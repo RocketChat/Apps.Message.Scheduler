@@ -1,0 +1,7 @@
+{
+    "delay_command_description": "Agendar o envio diferido de uma mensagem, ex. /delay 5m say olá",
+    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@utilizador] say <mensagem> | list | cancel <id> | help",
+    "max_delay_days_label": "Atraso máximo (dias)",
+    "max_delay_days_description": "Até quando no futuro uma mensagem pode ser agendada, em dias (1-365). Valores inválidos voltam a 30.",
+    "general": "Geral"
+}

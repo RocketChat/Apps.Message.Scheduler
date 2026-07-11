@@ -1,0 +1,17 @@
+{
+    "id": "d1a653e6-6f19-4f05-bf9d-f786b52d3e23",
+    "version": "0.0.9",
+    "requiredApiVersion": "1.64.0",
+    "iconFile": "icon.png",
+    "author": {
+        "name": "Mike Farman",
+        "homepage": "https://rocket.chat",
+        "support": "mailto:mike.farman@rocket.chat"
+    },
+    "name": "Message Scheduler",
+    "nameSlug": "appsmessagescheduler",
+    "classFile": "AppsMessageSchedulerApp.ts",
+    "shortDescription": "Compose a message to be sent at a later date",
+    "description": "Schedule messages with the /delay slash command, delivered later and sent as you, to the current channel or as a direct message to @mentioned users. Supports relative delays (5m, 8h30m) and natural times (8am tomorrow, 10am next monday) in each user's own timezone, with list and cancel management.",
+    "implements": []
+}

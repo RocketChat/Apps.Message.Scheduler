@@ -1,0 +1,7 @@
+{
+    "delay_command_description": "Schedule a message to be sent later, e.g. /delay 5m say hello",
+    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@user] say <message> | list | cancel <id> | help",
+    "max_delay_days_label": "Maximum delay (days)",
+    "max_delay_days_description": "The furthest into the future a message may be scheduled, in days (1-365). Invalid values fall back to 30.",
+    "general": "General"
+}

@@ -1,0 +1,7 @@
+{
+    "delay_command_description": "メッセージを予約して後で送信します。例: /delay 5m say こんにちは",
+    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@ユーザー] say <メッセージ> | list | cancel <id> | help",
+    "max_delay_days_label": "最大遅延（日数）",
+    "max_delay_days_description": "メッセージを予約できる最大日数（1〜365）。無効な値は 30 にフォールバックします。",
+    "general": "一般"
+}

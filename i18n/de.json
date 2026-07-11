@@ -1,0 +1,7 @@
+{
+    "delay_command_description": "Eine Nachricht planen, die später gesendet wird, z. B. /delay 5m say hallo",
+    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@user] say <Nachricht> | list | cancel <id> | help",
+    "max_delay_days_label": "Maximale Verzögerung (Tage)",
+    "max_delay_days_description": "Wie weit in die Zukunft eine Nachricht geplant werden darf, in Tagen (1-365). Ungültige Werte fallen auf 30 zurück.",
+    "general": "Allgemein"
+}

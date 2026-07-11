@@ -1,0 +1,7 @@
+{
+    "delay_command_description": "Schemalägg ett meddelande som skickas senare, t.ex. /delay 5m say hej",
+    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@användare] say <meddelande> | list | cancel <id> | help",
+    "max_delay_days_label": "Maximal fördröjning (dagar)",
+    "max_delay_days_description": "Hur långt in i framtiden ett meddelande kan schemaläggas, i dagar (1-365). Ogiltiga värden faller tillbaka till 30.",
+    "general": "Allmänt"
+}
