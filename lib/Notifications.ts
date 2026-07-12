@@ -13,6 +13,9 @@ export async function notifyUser(app: App, read: IRead, modify: IModify, user: I
         .setSender(appUser || user)
         .setRoom(room)
         .setText(text)
-        .setGroupable(false);
+        .setGroupable(false)
+        // the app user's stored avatar snapshots at install time, so point
+        // at the live app icon instead of relying on it
+        .setAvatarUrl(`/api/apps/${app.getID()}/icon`);
     await read.getNotifier().notifyUser(user, message.getMessage());
 }
