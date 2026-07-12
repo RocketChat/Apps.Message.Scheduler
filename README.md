@@ -99,11 +99,11 @@ icon.svg                          vector master for icon.png (render at 512px)
 
 The name, the subtitle under it, and the Description section on the App Info page come from `name`, `shortDescription`, and `description` in `app.json`. `shortDescription` is not part of the documented manifest type, but unknown manifest fields survive packaging and installation, and the admin UI renders it for private apps just as it does for marketplace apps. The Documentation link on the same page cannot be set for a private app; it only exists in marketplace metadata.
 
-### Known build issue
+### Build requirements
 
-With apps-cli 1.12.x and apps-engine 1.64.x, declaring an explicit `permissions` array in `app.json` makes `rc-apps package` fail with `Cannot find module '@rocket.chat/apps-engine/server/permissions/AppPermissions'`, because the CLI still looks for the module at its old path. This app therefore omits the permissions block and relies on the engine's default permission set, which covers everything it uses (slash command, scheduler, persistence, room and message access).
+Use apps-cli 1.14.0 or later. Older CLI releases (1.12.x) bundle an apps-compiler that looks for the engine's permission definitions at a path that moved in apps-engine 1.64, so `rc-apps package` fails with `Cannot find module '@rocket.chat/apps-engine/server/permissions/AppPermissions'` whenever `app.json` declares a `permissions` array. The compiler shipped with 1.14.0 handles both paths, and this app declares its permissions explicitly (`slashcommand`, `scheduler`, `persistence`, `message.write`, `room.read`, `room.write`, `user.read`, `server-setting.read`).
 
-Because of this, `@rocket.chat/apps-engine` is pinned to the exact version `1.64.1` in `package.json` so that builds stay reproducible against the combination that is known to work. When a fixed apps-cli release is available, unpin the engine, add the explicit permissions block (`slashcommand`, `scheduler`, `persistence`, `message.write`, `room.read`, `room.write`, `user.read`, `server-setting.read`), and verify `rc-apps package` succeeds.
+`@rocket.chat/apps-engine` stays pinned to an exact version in `package.json` for a different reason: `rc-apps deploy` rewrites `requiredApiVersion` in `app.json` to the exact version of the locally installed engine, so the pin must match the engine version of the target server (currently 1.64.0) or the server rejects the upload.
 
 ## Licence
 
