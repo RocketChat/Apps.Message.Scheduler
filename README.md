@@ -1,6 +1,6 @@
 # Message Scheduler for Rocket.Chat
 
-A Rocket.Chat app that schedules messages to be sent later, using the `/delay` slash command. Messages are delivered by the native Apps-Engine scheduler and appear as if you sent them yourself at the scheduled time. No REST calls, no external services, and scheduled jobs survive server restarts.
+A Rocket.Chat app for scheduling messages. The `/delay` slash command sends a message later, as you, to the current channel, to other channels, or as a direct message to mentioned users. The `/remind` command sets personal reminders that the app bot delivers to you by direct message at the chosen time. Everything runs on the native Apps-Engine scheduler: no REST calls, no external services, and scheduled jobs survive server restarts.
 
 ## Usage
 
