@@ -20,6 +20,15 @@ Schedule a direct message by adding one or more @mentions. Mentions and the time
 /delay 8h @bob @carol say gentle nudge: please review my PR
 ```
 
+Send to other channels the same way, with one or more #channel names. Channels and @mentions can be combined in a single command, and the message goes to every listed destination:
+
+```
+/delay 10m #announcements say the maintenance window starts soon
+/delay 1h #dev #ops @carol say deploy is done
+```
+
+You must be a member of every channel you target, since the message is sent as you.
+
 Manage your scheduled messages:
 
 ```
@@ -29,7 +38,20 @@ Manage your scheduled messages:
 /delay help          shows the built-in help
 ```
 
-Every successful schedule replies with an ephemeral confirmation showing the id, the resolved delivery time, and how far away it is.
+Every successful schedule replies with an ephemeral confirmation showing the id, the resolved delivery time, and how far away it is, along with Cancel, List, and Help buttons.
+
+When the app is installed, its bot sends the installing admin a direct message with the full usage guide, in the admin's own language.
+
+## Personal reminders
+
+The `/remind` command is a specialisation of the same engine for reminding yourself. It takes only a time and a message, and at the chosen time the app bot sends you a direct message such as "⏰ Reminder: check the oven". Delivery deliberately comes from the bot rather than from you: Rocket.Chat never notifies users about their own messages, so a self-sent reminder would not ping.
+
+```
+/remind 20m say check the oven
+/remind 8am tomorrow say submit the report
+```
+
+`/remind list` and `/remind cancel all` manage only reminders, while `/delay list` shows everything you have scheduled, reminders included. Ids are shared, so either command can cancel by id.
 
 ## Time formats
 
@@ -47,7 +69,7 @@ The message text is everything after the word `say`, taken literally. Time-like 
 
 The app accepts the message text on a new line after `say`, and quoted text keeps its line breaks in the delivered message. Be aware of a Rocket.Chat client limitation, though: when a slash command is typed in the message box, the client discards everything after the first line break before it reaches any app, so a multi-line command typed with Shift+Enter loses its later lines. The app detects the resulting dangling `say` and replies with a hint to keep the command on one line. Commands sent through the REST API (`commands.run`) do not have this limitation.
 
-When one or more users are mentioned, the message is delivered as a direct message to each of them, creating the DM room if it does not exist yet. Without mentions, it is delivered to the channel where the command was typed.
+When one or more users are mentioned, the message is delivered as a direct message to each of them, creating the DM room if it does not exist yet. Channel targets are stored by id, so they survive channel renames. Without any explicit targets, the message is delivered to the room where the command was typed.
 
 Delivered messages are sent as the scheduling user, not as a bot.
 
@@ -58,6 +80,7 @@ You can only list and cancel your own scheduled messages.
 | Setting | Default | Description |
 | ------- | ------- | ----------- |
 | Maximum delay (days) | 30 | The furthest into the future a message may be scheduled, between 1 and 365 days. Invalid values are rejected in the admin log and fall back to 30. |
+| List snippet length (characters) | 80 | How many characters of each scheduled message are shown in `/delay list` before truncation, between 20 and 500. Longer messages get a Show button that reveals the full text. Invalid values fall back to 80. |
 
 ## Internationalisation
 

@@ -1,7 +1,11 @@
 {
     "delay_command_description": "Pianifica l'invio differito di un messaggio, es. /delay 5m say ciao",
-    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@utente] say <messaggio> | list | cancel <id> | help",
+    "delay_command_params": "<tempo> [@user] [#channel] say <messaggio>",
     "max_delay_days_label": "Ritardo massimo (giorni)",
     "max_delay_days_description": "Quanto lontano nel futuro può essere pianificato un messaggio, in giorni (1-365). I valori non validi ricadono su 30.",
-    "general": "Generale"
+    "general": "Generale",
+    "list_snippet_length_label": "Lunghezza dell'anteprima nella lista (caratteri)",
+    "list_snippet_length_description": "Quanti caratteri di ogni messaggio pianificato vengono mostrati in /delay list prima del troncamento (20-500). I messaggi più lunghi ricevono un pulsante Mostra. I valori non validi ricadono su 80.",
+    "remind_command_description": "Imposta un promemoria personale, es. /remind 20m say controlla il forno",
+    "remind_command_params": "<tempo> say <promemoria>"
 }

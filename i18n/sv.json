@@ -1,7 +1,11 @@
 {
     "delay_command_description": "Schemalägg ett meddelande som skickas senare, t.ex. /delay 5m say hej",
-    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@användare] say <meddelande> | list | cancel <id> | help",
+    "delay_command_params": "<tid> [@user] [#channel] say <meddelande>",
     "max_delay_days_label": "Maximal fördröjning (dagar)",
     "max_delay_days_description": "Hur långt in i framtiden ett meddelande kan schemaläggas, i dagar (1-365). Ogiltiga värden faller tillbaka till 30.",
-    "general": "Allmänt"
+    "general": "Allmänt",
+    "list_snippet_length_label": "Utdragets längd i listan (tecken)",
+    "list_snippet_length_description": "Hur många tecken av varje schemalagt meddelande som visas i /delay list innan de kortas av (20-500). Längre meddelanden får en Visa-knapp. Ogiltiga värden faller tillbaka till 80.",
+    "remind_command_description": "Skapa en personlig påminnelse, t.ex. /remind 20m say kolla ugnen",
+    "remind_command_params": "<tid> say <påminnelse>"
 }

@@ -1,7 +1,11 @@
 {
     "delay_command_description": "メッセージを予約して後で送信します。例: /delay 5m say こんにちは",
-    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@ユーザー] say <メッセージ> | list | cancel <id> | help",
+    "delay_command_params": "<時間> [@user] [#channel] say <メッセージ>",
     "max_delay_days_label": "最大遅延（日数）",
     "max_delay_days_description": "メッセージを予約できる最大日数（1〜365）。無効な値は 30 にフォールバックします。",
-    "general": "一般"
+    "general": "一般",
+    "list_snippet_length_label": "リストの抜粋の長さ（文字数）",
+    "list_snippet_length_description": "/delay list で各予約メッセージを何文字まで表示するか（20〜500）。それより長いメッセージには表示ボタンが付きます。無効な値は 80 にフォールバックします。",
+    "remind_command_description": "個人リマインダーを設定します。例: /remind 20m say オーブンを確認",
+    "remind_command_params": "<時間> say <リマインダー>"
 }

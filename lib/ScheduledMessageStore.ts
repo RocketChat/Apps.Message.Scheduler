@@ -5,8 +5,10 @@ export interface IScheduledMessageRecord {
     shortId: string;
     jobId: string;
     userId: string;
-    roomId: string;           // room the command was typed in (delivery target when no mentions)
-    targetUsernames: Array<string>; // non-empty => deliver as DM to each
+    roomId: string;           // room the command was typed in (delivery target when no explicit targets)
+    targetUsernames: Array<string>; // deliver as a DM to each
+    targetChannelIds?: Array<string>; // deliver to each channel (optional: predates v0.0.14 records)
+    kind?: 'delay' | 'remind'; // remind = bot DMs the scheduling user (optional: predates v0.0.32 records)
     text: string;
     whenIso: string;
     createdAtIso: string;

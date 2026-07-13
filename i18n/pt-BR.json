@@ -1,7 +1,11 @@
 {
     "delay_command_description": "Agende o envio de uma mensagem para mais tarde, ex. /delay 5m say olá",
-    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@usuário] say <mensagem> | list | cancel <id> | help",
+    "delay_command_params": "<tempo> [@user] [#channel] say <mensagem>",
     "max_delay_days_label": "Atraso máximo (dias)",
     "max_delay_days_description": "Até quando no futuro uma mensagem pode ser agendada, em dias (1-365). Valores inválidos voltam para 30.",
-    "general": "Geral"
+    "general": "Geral",
+    "list_snippet_length_label": "Comprimento do trecho na lista (caracteres)",
+    "list_snippet_length_description": "Quantos caracteres de cada mensagem agendada são mostrados em /delay list antes do corte (20-500). Mensagens mais longas recebem um botão Mostrar. Valores inválidos voltam para 80.",
+    "remind_command_description": "Crie um lembrete pessoal, ex. /remind 20m say verifique o forno",
+    "remind_command_params": "<tempo> say <lembrete>"
 }

@@ -1,7 +1,11 @@
 {
     "delay_command_description": "Schedule a message to be sent later, e.g. /delay 5m say hello",
-    "delay_command_params": "5m | 8am tomorrow | 10am next monday [@user] say <message> | list | cancel <id> | help",
+    "delay_command_params": "<time> [@user] [#channel] say <message>",
     "max_delay_days_label": "Maximum delay (days)",
     "max_delay_days_description": "The furthest into the future a message may be scheduled, in days (1-365). Invalid values fall back to 30.",
-    "general": "General"
+    "general": "General",
+    "list_snippet_length_label": "List snippet length (characters)",
+    "list_snippet_length_description": "How many characters of each scheduled message are shown in /delay list before truncation (20-500). Longer messages get a Show button. Invalid values fall back to 80.",
+    "remind_command_description": "Set a personal reminder, e.g. /remind 20m say check the oven",
+    "remind_command_params": "<time> say <reminder>"
 }
