@@ -27,7 +27,7 @@ Send to other channels the same way, with one or more #channel names. Channels a
 /delay 1h #dev #ops @carol say deploy is done
 ```
 
-You must be a member of every channel you target, since the message is sent as you.
+You must be a member of every channel you target, since the message is sent as you. Membership is checked again when the message is due: if you have left or been removed from a target channel (or from the room you scheduled in) before delivery, that delivery is dropped rather than posted into a room you no longer have access to.
 
 Manage your scheduled messages:
 

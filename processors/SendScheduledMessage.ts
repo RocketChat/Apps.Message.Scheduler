@@ -2,11 +2,18 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IJobContext } from '@rocket.chat/apps-engine/definition/scheduler';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 
+import { IRoom, RoomType } from '@rocket.chat/apps-engine/definition/rooms';
+
 import { t } from '../lib/i18n';
 import { getOrCreateDirectRoom, sendAsUser } from '../lib/MessageDelivery';
 import { ScheduledMessageStore } from '../lib/ScheduledMessageStore';
 
 export const SEND_MESSAGE_PROCESSOR_ID = 'scheduled-message';
+
+async function isMember(read: IRead, roomId: string, userId: string): Promise<boolean> {
+    const members = await read.getRoomReader().getMembers(roomId);
+    return members.some((m) => m.id === userId);
+}
 
 export function makeSendScheduledMessageProcessor(app: App) {
     return async (jobContext: IJobContext, read: IRead, modify: IModify, _http: IHttp, persis: IPersistence): Promise<void> => {
@@ -45,11 +52,18 @@ export function makeSendScheduledMessageProcessor(app: App) {
             const channelIds = record.targetChannelIds || [];
             const usernames = record.targetUsernames || [];
 
+            // membership was validated at schedule time, but up to the full
+            // delay can pass before the job fires: re-check at delivery so a
+            // user who left or was removed cannot still post into the room
             if (channelIds.length || usernames.length) {
                 for (const channelId of channelIds) {
                     const channel = await read.getRoomReader().getById(channelId);
                     if (!channel) {
                         app.getLogger().warn(`Channel ${channelId} for scheduled message ${shortId} no longer exists, skipping`);
+                        continue;
+                    }
+                    if (!(await isMember(read, channel.id, sender.id))) {
+                        app.getLogger().warn(`Sender is no longer a member of ${channel.slugifiedName}, skipping scheduled message ${shortId} for that channel`);
                         continue;
                     }
                     await sendAsUser(modify, sender, channel, record.text);
@@ -62,6 +76,10 @@ export function makeSendScheduledMessageProcessor(app: App) {
                 const room = await read.getRoomReader().getById(record.roomId);
                 if (!room) {
                     throw new Error(`Room ${record.roomId} no longer exists`);
+                }
+                if (room.type !== RoomType.DIRECT_MESSAGE && !(await isMember(read, room.id, sender.id))) {
+                    app.getLogger().warn(`Sender is no longer a member of ${room.slugifiedName}, dropping scheduled message ${shortId}`);
+                    return;
                 }
                 await sendAsUser(modify, sender, room, record.text);
             }
