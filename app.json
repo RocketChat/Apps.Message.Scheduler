@@ -1,7 +1,7 @@
 {
     "id": "d1a653e6-6f19-4f05-bf9d-f786b52d3e23",
-    "version": "0.0.32",
-    "requiredApiVersion": "1.64.1",
+    "version": "0.0.33",
+    "requiredApiVersion": "^1.64.0",
     "iconFile": "icon.png",
     "author": {
         "name": "Mike Farman",

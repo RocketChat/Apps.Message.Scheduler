@@ -126,7 +126,7 @@ The name, the subtitle under it, and the Description section on the App Info pag
 
 Use apps-cli 1.14.0 or later. Older CLI releases (1.12.x) bundle an apps-compiler that looks for the engine's permission definitions at a path that moved in apps-engine 1.64, so `rc-apps package` fails with `Cannot find module '@rocket.chat/apps-engine/server/permissions/AppPermissions'` whenever `app.json` declares a `permissions` array. The compiler shipped with 1.14.0 handles both paths, and this app declares its permissions explicitly (`slashcommand`, `scheduler`, `persistence`, `message.write`, `room.read`, `room.write`, `user.read`, `server-setting.read`).
 
-`@rocket.chat/apps-engine` stays pinned to an exact version in `package.json` for a different reason: `rc-apps deploy` rewrites `requiredApiVersion` in `app.json` to the exact version of the locally installed engine, so the pin must match the engine version of the target server (currently 1.64.0) or the server rejects the upload.
+Keep the `@rocket.chat/apps-engine` dependency in `package.json` as a caret range (`^1.64.0`), never an exact version. `rc-apps deploy` copies this dependency spec into `requiredApiVersion` in `app.json`, and the server matches its engine version against that expression. A range accepts every 1.x server from 1.64.0 up, while an exact pin makes the app installable only on servers running exactly that engine version and nothing else.
 
 ## Licence
 
