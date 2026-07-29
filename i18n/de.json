@@ -1,11 +1,15 @@
 {
     "delay_command_description": "Eine Nachricht planen, die später gesendet wird, z. B. /delay 5m say hallo",
-    "delay_command_params": "<Zeit> [@user] [#channel] say <Nachricht>",
+    "delay_command_params": "<Zeit> | every <day> at <time> [@user] [#channel] say <Nachricht>",
     "max_delay_days_label": "Maximale Verzögerung (Tage)",
     "max_delay_days_description": "Wie weit in die Zukunft eine Nachricht geplant werden darf, in Tagen (1-365). Ungültige Werte fallen auf 30 zurück.",
     "general": "Allgemein",
     "list_snippet_length_label": "Länge der Vorschau in der Liste (Zeichen)",
     "list_snippet_length_description": "Wie viele Zeichen jeder geplanten Nachricht in /delay list angezeigt werden, bevor gekürzt wird (20-500). Längere Nachrichten erhalten einen Anzeigen-Knopf. Ungültige Werte fallen auf 80 zurück.",
     "remind_command_description": "Eine persönliche Erinnerung setzen, z. B. /remind 20m say Ofen prüfen",
-    "remind_command_params": "<Zeit> say <Erinnerung>"
+    "remind_command_params": "<Zeit> | every <day> at <time> say <Erinnerung>",
+    "allow_recurring_label": "Wiederkehrende Nachrichten erlauben",
+    "allow_recurring_description": "Wenn deaktiviert, lehnen /delay und /remind \"every ...\"-Zeitpläne ab. Bestehende Wiederholungen werden nicht mehr eingeplant.",
+    "max_recurring_per_user_label": "Maximale wiederkehrende Zeitpläne pro Benutzer",
+    "max_recurring_per_user_description": "Wie viele aktive wiederkehrende Zeitpläne jeder Benutzer haben darf (1-100). Ungültige Werte fallen auf 10 zurück."
 }

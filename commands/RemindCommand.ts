@@ -8,7 +8,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { cancelAll, cancelOne, createSchedule, listMessages } from '../lib/Actions';
 import { getUserLanguage, t } from '../lib/i18n';
 import { notifyUser } from '../lib/Notifications';
-import { formatDuration, formatWhen } from '../lib/TimeParser';
+import { formatDuration, formatRecurrence, formatWhen } from '../lib/TimeParser';
 
 /**
  * Personal reminders: same parser and scheduler as /delay, but the target
@@ -86,12 +86,20 @@ export class RemindCommand implements ISlashCommand {
             return;
         }
 
-        let confirmation = t(lang, 'confirm_scheduled', {
-            id: result.record.shortId,
-            target: t(lang, 'confirm_target_reminder'),
-            when: formatWhen(result.when, result.usedServerTz ? undefined : user.utcOffset, lang),
-            relative: t(lang, 'relative_in', { duration: formatDuration(result.delayMs) }),
-        });
+        const firstWhen = formatWhen(result.when, result.usedServerTz ? undefined : user.utcOffset, lang);
+        let confirmation = result.recurrence
+            ? t(lang, 'confirm_scheduled_recurring', {
+                id: result.record.shortId,
+                target: t(lang, 'confirm_target_reminder'),
+                recurrence: formatRecurrence(result.recurrence, lang),
+                next: firstWhen,
+            })
+            : t(lang, 'confirm_scheduled', {
+                id: result.record.shortId,
+                target: t(lang, 'confirm_target_reminder'),
+                when: firstWhen,
+                relative: t(lang, 'relative_in', { duration: formatDuration(result.delayMs) }),
+            });
         if (result.usedServerTz) {
             confirmation += `\n${t(lang, 'tz_warning')}`;
         }

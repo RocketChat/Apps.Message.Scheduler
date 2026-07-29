@@ -18,12 +18,22 @@ const strings: Catalog = {
         confirm_target_dm: 'a direct message to {users}',
         confirm_target_channels: 'to {channels}',
         confirm_target_reminder: 'as a reminder to you',
+        confirm_scheduled_recurring: '✅ Scheduled *{recurrence}*: will send {target}, next on *{next}*. Message ID: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · next {next} · {target}',
+        recur_daily: 'every day at {time}',
+        recur_weekdays: 'every weekday at {time}',
+        recur_weekly: 'every {weekday} at {time}',
+        err_recur_unsupported: 'Repeats need a day and a time, e.g. `every day at 8am`, `every weekday at 9am` or `every monday at 8am`.',
+        err_recur_limit: 'You already have {max} repeating schedules, the limit set by the admin. Cancel one first.',
+        err_recur_disabled: 'Repeating messages are turned off on this workspace.',
+        recur_cancelled_access: '🔁 Your repeating message `{id}` was cancelled because you no longer have access to {target}.',
         remind_delivery: '⏰ Reminder: {text}',
         remind_help_text:
             '*Personal reminders (`/remind`)*\n' +
             'The app will remind you by direct message at the chosen time. The word `say` is required.\n\n' +
             '• `/remind 20m say check the oven`\n' +
             '• `/remind 8am tomorrow say submit the report`\n\n' +
+            '*Repeat a reminder:* `/remind every weekday at 9am say stand-up`\n\n' +
             '*Manage:* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'Channel #{name} was not found on this server.',
         err_not_channel_member: 'You are not a member of #{name}.',
@@ -68,6 +78,11 @@ const strings: Catalog = {
             '*Send as a direct message:* add one or more @mentions (before `say`, any order):\n' +
             '• `/delay @bob 5m say ping me when free`\n' +
             '• `/delay 8h @bob @carol say nudge: review my PR`\n\n' +
+            '*Repeat a message:* start with `every` and give a day and a time:\n' +
+            '• `/delay every day at 8am say daily standup starts soon`\n' +
+            '• `/delay every weekday at 9am #team say morning check-in`\n' +
+            '• `/delay every monday at 8am say check your weekly tasks`\n' +
+            'Repeats run until you cancel them, and `/delay list` shows the next run.\n\n' +
             '*Time formats:* delays `3s` `5m` `8h` `2d` `1w` and combos `8h30m`; clock times `8am`, `14:30`, `noon`, `midnight` with `today`, `tomorrow`, a weekday, or `next <weekday>`.\n' +
             'Clock times use *your* timezone (profile setting).\n\n' +
             '*Manage:*\n' +
@@ -81,12 +96,22 @@ const strings: Catalog = {
         confirm_target_dm: 'als Direktnachricht an {users}',
         confirm_target_channels: 'in {channels}',
         confirm_target_reminder: 'als Erinnerung an dich',
+        confirm_scheduled_recurring: '✅ Geplant *{recurrence}*: wird {target} gesendet, nächstes Mal am *{next}*. Nachrichten-ID: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · nächstes Mal {next} · {target}',
+        recur_daily: 'täglich um {time}',
+        recur_weekdays: 'an jedem Wochentag um {time}',
+        recur_weekly: 'jeden {weekday} um {time}',
+        err_recur_unsupported: 'Wiederholungen brauchen einen Tag und eine Uhrzeit, z. B. `every day at 8am`, `every weekday at 9am` oder `every monday at 8am`.',
+        err_recur_limit: 'Du hast bereits {max} wiederkehrende Zeitpläne, das vom Admin gesetzte Limit. Storniere zuerst einen.',
+        err_recur_disabled: 'Wiederkehrende Nachrichten sind in diesem Workspace deaktiviert.',
+        recur_cancelled_access: '🔁 Deine wiederkehrende Nachricht `{id}` wurde storniert, weil du keinen Zugriff mehr auf {target} hast.',
         remind_delivery: '⏰ Erinnerung: {text}',
         remind_help_text:
             '*Persönliche Erinnerungen (`/remind`)*\n' +
             'Die App erinnert dich zur gewählten Zeit per Direktnachricht. Das Wort `say` ist erforderlich.\n\n' +
             '• `/remind 20m say Ofen prüfen`\n' +
             '• `/remind 8am tomorrow say Bericht abgeben`\n\n' +
+            '*Erinnerung wiederholen:* `/remind every weekday at 9am say Stand-up`\n\n' +
             '*Verwalten:* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'Der Kanal #{name} wurde auf diesem Server nicht gefunden.',
         err_not_channel_member: 'Du bist kein Mitglied von #{name}.',
@@ -128,6 +153,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say Wartungsfenster beginnt bald`\n\n' +
             '*Als Direktnachricht:* @Erwähnungen vor `say` hinzufügen (Reihenfolge egal):\n' +
             '• `/delay @bob 5m say melde dich, wenn du frei bist`\n\n' +
+            '*Nachricht wiederholen:* beginne mit `every` und gib Tag und Uhrzeit an:\n' +
+            '• `/delay every day at 8am say Standup beginnt bald`\n' +
+            '• `/delay every weekday at 9am #team say Morgen-Check-in`\n' +
+            '• `/delay every monday at 8am say Wochenaufgaben prüfen`\n' +
+            'Wiederholungen laufen bis zur Stornierung, `/delay list` zeigt den nächsten Termin.\n\n' +
             '*Zeitformate:* Verzögerungen `3s` `5m` `8h` `2d` `1w`, Kombis `8h30m`; Uhrzeiten `8am`, `14:30`, `noon`, `midnight` mit `today`, `tomorrow`, Wochentag oder `next <Wochentag>`.\n' +
             'Uhrzeiten nutzen *deine* Zeitzone (Profileinstellung).\n\n' +
             '*Verwalten:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
@@ -138,12 +168,22 @@ const strings: Catalog = {
         confirm_target_dm: 'en message direct à {users}',
         confirm_target_channels: 'vers {channels}',
         confirm_target_reminder: 'comme rappel pour vous',
+        confirm_scheduled_recurring: '✅ Planifié *{recurrence}* : sera envoyé {target}, prochaine fois le *{next}*. ID du message : `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · prochaine fois {next} · {target}',
+        recur_daily: 'chaque jour à {time}',
+        recur_weekdays: 'chaque jour de semaine à {time}',
+        recur_weekly: 'chaque {weekday} à {time}',
+        err_recur_unsupported: 'Une répétition demande un jour et une heure, ex. `every day at 8am`, `every weekday at 9am` ou `every monday at 8am`.',
+        err_recur_limit: 'Vous avez déjà {max} planifications récurrentes, la limite fixée par l\'administrateur. Annulez-en une d\'abord.',
+        err_recur_disabled: 'Les messages récurrents sont désactivés sur cet espace de travail.',
+        recur_cancelled_access: '🔁 Votre message récurrent `{id}` a été annulé car vous n\'avez plus accès à {target}.',
         remind_delivery: '⏰ Rappel : {text}',
         remind_help_text:
             '*Rappels personnels (`/remind`)*\n' +
             'L\'app vous rappelle par message direct à l\'heure choisie. Le mot `say` est obligatoire.\n\n' +
             '• `/remind 20m say vérifier le four`\n' +
             '• `/remind 8am tomorrow say envoyer le rapport`\n\n' +
+            '*Répéter un rappel :* `/remind every weekday at 9am say stand-up`\n\n' +
             '*Gérer :* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'Le canal #{name} est introuvable sur ce serveur.',
         err_not_channel_member: 'Vous n\'êtes pas membre de #{name}.',
@@ -185,6 +225,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say la maintenance commence bientôt`\n\n' +
             '*En message direct :* ajoutez des @mentions avant `say` (ordre libre) :\n' +
             '• `/delay @bob 5m say ping quand tu es libre`\n\n' +
+            '*Répéter un message :* commencez par `every` avec un jour et une heure :\n' +
+            '• `/delay every day at 8am say le standup commence bientôt`\n' +
+            '• `/delay every weekday at 9am #team say point du matin`\n' +
+            '• `/delay every monday at 8am say vérifiez vos tâches de la semaine`\n' +
+            'Les répétitions durent jusqu\'à annulation, `/delay list` montre la prochaine.\n\n' +
             '*Formats :* délais `3s` `5m` `8h` `2d` `1w`, combinés `8h30m` ; heures `8am`, `14:30`, `noon`, `midnight` avec `today`, `tomorrow`, un jour de semaine ou `next <jour>`.\n' +
             'Les heures utilisent *votre* fuseau (profil).\n\n' +
             '*Gérer :* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
@@ -195,12 +240,22 @@ const strings: Catalog = {
         confirm_target_dm: 'come messaggio diretto a {users}',
         confirm_target_channels: 'in {channels}',
         confirm_target_reminder: 'come promemoria per te',
+        confirm_scheduled_recurring: '✅ Pianificato *{recurrence}*: sarà inviato {target}, prossima volta il *{next}*. ID del messaggio: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · prossima volta {next} · {target}',
+        recur_daily: 'ogni giorno alle {time}',
+        recur_weekdays: 'ogni giorno lavorativo alle {time}',
+        recur_weekly: 'ogni {weekday} alle {time}',
+        err_recur_unsupported: 'Le ripetizioni richiedono un giorno e un orario, es. `every day at 8am`, `every weekday at 9am` o `every monday at 8am`.',
+        err_recur_limit: 'Hai già {max} pianificazioni ricorrenti, il limite impostato dall\'amministratore. Annullane una prima.',
+        err_recur_disabled: 'I messaggi ricorrenti sono disattivati in questo workspace.',
+        recur_cancelled_access: '🔁 Il tuo messaggio ricorrente `{id}` è stato annullato perché non hai più accesso a {target}.',
         remind_delivery: '⏰ Promemoria: {text}',
         remind_help_text:
             '*Promemoria personali (`/remind`)*\n' +
             'L\'app ti ricorda con un messaggio diretto all\'ora scelta. La parola `say` è obbligatoria.\n\n' +
             '• `/remind 20m say controlla il forno`\n' +
             '• `/remind 8am tomorrow say invia il rapporto`\n\n' +
+            '*Ripetere un promemoria:* `/remind every weekday at 9am say stand-up`\n\n' +
             '*Gestione:* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'Il canale #{name} non è stato trovato su questo server.',
         err_not_channel_member: 'Non sei membro di #{name}.',
@@ -242,6 +297,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say la manutenzione inizia a breve`\n\n' +
             '*Come messaggio diretto:* aggiungi una o più @menzioni prima di `say` (in qualsiasi ordine):\n' +
             '• `/delay @bob 5m say scrivimi quando sei libero`\n\n' +
+            '*Ripetere un messaggio:* inizia con `every` indicando giorno e orario:\n' +
+            '• `/delay every day at 8am say lo standup inizia a breve`\n' +
+            '• `/delay every weekday at 9am #team say check-in del mattino`\n' +
+            '• `/delay every monday at 8am say controlla le attività della settimana`\n' +
+            'Le ripetizioni continuano fino all\'annullamento, `/delay list` mostra la prossima.\n\n' +
             '*Formati:* ritardi `3s` `5m` `8h` `2d` `1w`, combinati `8h30m`; orari `8am`, `14:30`, `noon`, `midnight` con `today`, `tomorrow`, un giorno della settimana o `next <giorno>`.\n' +
             'Gli orari usano il *tuo* fuso orario (impostazione del profilo).\n\n' +
             '*Gestione:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
@@ -252,12 +312,22 @@ const strings: Catalog = {
         confirm_target_dm: 'como mensaje directo a {users}',
         confirm_target_channels: 'a {channels}',
         confirm_target_reminder: 'como recordatorio para ti',
+        confirm_scheduled_recurring: '✅ Programado *{recurrence}*: se enviará {target}, la próxima vez el *{next}*. ID del mensaje: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · próxima vez {next} · {target}',
+        recur_daily: 'todos los días a las {time}',
+        recur_weekdays: 'cada día laborable a las {time}',
+        recur_weekly: 'cada {weekday} a las {time}',
+        err_recur_unsupported: 'Las repeticiones necesitan un día y una hora, p. ej. `every day at 8am`, `every weekday at 9am` o `every monday at 8am`.',
+        err_recur_limit: 'Ya tienes {max} programaciones periódicas, el límite fijado por el administrador. Cancela una primero.',
+        err_recur_disabled: 'Los mensajes periódicos están desactivados en este espacio de trabajo.',
+        recur_cancelled_access: '🔁 Tu mensaje periódico `{id}` se canceló porque ya no tienes acceso a {target}.',
         remind_delivery: '⏰ Recordatorio: {text}',
         remind_help_text:
             '*Recordatorios personales (`/remind`)*\n' +
             'La app te recuerda por mensaje directo a la hora elegida. La palabra `say` es obligatoria.\n\n' +
             '• `/remind 20m say revisa el horno`\n' +
             '• `/remind 8am tomorrow say envía el informe`\n\n' +
+            '*Repetir un recordatorio:* `/remind every weekday at 9am say stand-up`\n\n' +
             '*Gestión:* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'El canal #{name} no se encontró en este servidor.',
         err_not_channel_member: 'No eres miembro de #{name}.',
@@ -299,6 +369,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say el mantenimiento empieza pronto`\n\n' +
             '*Como mensaje directo:* añade una o más @menciones antes de `say` (en cualquier orden):\n' +
             '• `/delay @bob 5m say avísame cuando estés libre`\n\n' +
+            '*Repetir un mensaje:* empieza con `every` e indica día y hora:\n' +
+            '• `/delay every day at 8am say el standup empieza pronto`\n' +
+            '• `/delay every weekday at 9am #team say revisión de la mañana`\n' +
+            '• `/delay every monday at 8am say revisa tus tareas de la semana`\n' +
+            'Las repeticiones siguen hasta que las canceles, `/delay list` muestra la próxima.\n\n' +
             '*Formatos:* retrasos `3s` `5m` `8h` `2d` `1w` y combinados `8h30m`; horas `8am`, `14:30`, `noon`, `midnight` con `today`, `tomorrow`, un día de la semana o `next <día>`.\n' +
             'Las horas usan *tu* zona horaria (ajuste del perfil).\n\n' +
             '*Gestión:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
@@ -309,12 +384,22 @@ const strings: Catalog = {
         confirm_target_dm: 'som direktmeddelande till {users}',
         confirm_target_channels: 'till {channels}',
         confirm_target_reminder: 'som en påminnelse till dig',
+        confirm_scheduled_recurring: '✅ Schemalagt *{recurrence}*: skickas {target}, nästa gång *{next}*. Meddelande-ID: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · nästa gång {next} · {target}',
+        recur_daily: 'varje dag kl. {time}',
+        recur_weekdays: 'varje vardag kl. {time}',
+        recur_weekly: 'varje {weekday} kl. {time}',
+        err_recur_unsupported: 'Upprepningar behöver en dag och en tid, t.ex. `every day at 8am`, `every weekday at 9am` eller `every monday at 8am`.',
+        err_recur_limit: 'Du har redan {max} återkommande scheman, gränsen som administratören satt. Avbryt ett först.',
+        err_recur_disabled: 'Återkommande meddelanden är avstängda i den här arbetsytan.',
+        recur_cancelled_access: '🔁 Ditt återkommande meddelande `{id}` avbröts eftersom du inte längre har åtkomst till {target}.',
         remind_delivery: '⏰ Påminnelse: {text}',
         remind_help_text:
             '*Personliga påminnelser (`/remind`)*\n' +
             'Appen påminner dig via direktmeddelande vid vald tid. Ordet `say` är obligatoriskt.\n\n' +
             '• `/remind 20m say kolla ugnen`\n' +
             '• `/remind 8am tomorrow say lämna in rapporten`\n\n' +
+            '*Upprepa en påminnelse:* `/remind every weekday at 9am say stand-up`\n\n' +
             '*Hantera:* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'Kanalen #{name} hittades inte på den här servern.',
         err_not_channel_member: 'Du är inte medlem i #{name}.',
@@ -356,6 +441,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say underhållsfönstret börjar snart`\n\n' +
             '*Som direktmeddelande:* lägg till en eller flera @omnämnanden före `say` (valfri ordning):\n' +
             '• `/delay @bob 5m say hör av dig när du är ledig`\n\n' +
+            '*Upprepa ett meddelande:* börja med `every` och ange dag och tid:\n' +
+            '• `/delay every day at 8am say standup börjar snart`\n' +
+            '• `/delay every weekday at 9am #team say morgoncheck`\n' +
+            '• `/delay every monday at 8am say kolla veckans uppgifter`\n' +
+            'Upprepningar pågår till du avbryter dem, `/delay list` visar nästa gång.\n\n' +
             '*Tidsformat:* fördröjningar `3s` `5m` `8h` `2d` `1w` och kombinationer `8h30m`; klockslag `8am`, `14:30`, `noon`, `midnight` med `today`, `tomorrow`, en veckodag eller `next <veckodag>`.\n' +
             'Klockslag använder *din* tidszon (profilinställning).\n\n' +
             '*Hantera:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
@@ -366,12 +456,22 @@ const strings: Catalog = {
         confirm_target_dm: 'como mensagem direta a {users}',
         confirm_target_channels: 'para {channels}',
         confirm_target_reminder: 'como lembrete para ti',
+        confirm_scheduled_recurring: '✅ Agendado *{recurrence}*: será enviado {target}, a próxima vez em *{next}*. ID da mensagem: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · próxima vez {next} · {target}',
+        recur_daily: 'todos os dias às {time}',
+        recur_weekdays: 'em cada dia de semana às {time}',
+        recur_weekly: 'todas as {weekday} às {time}',
+        err_recur_unsupported: 'As repetições precisam de um dia e uma hora, ex. `every day at 8am`, `every weekday at 9am` ou `every monday at 8am`.',
+        err_recur_limit: 'Já tens {max} agendamentos recorrentes, o limite definido pelo administrador. Cancela um primeiro.',
+        err_recur_disabled: 'As mensagens recorrentes estão desativadas neste espaço de trabalho.',
+        recur_cancelled_access: '🔁 A tua mensagem recorrente `{id}` foi cancelada porque já não tens acesso a {target}.',
         remind_delivery: '⏰ Lembrete: {text}',
         remind_help_text:
             '*Lembretes pessoais (`/remind`)*\n' +
             'A app lembra-te por mensagem direta à hora escolhida. A palavra `say` é obrigatória.\n\n' +
             '• `/remind 20m say verifica o forno`\n' +
             '• `/remind 8am tomorrow say entrega o relatório`\n\n' +
+            '*Repetir um lembrete:* `/remind every weekday at 9am say stand-up`\n\n' +
             '*Gerir:* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'O canal #{name} não foi encontrado neste servidor.',
         err_not_channel_member: 'Não és membro de #{name}.',
@@ -413,6 +513,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say a manutenção começa em breve`\n\n' +
             '*Como mensagem direta:* adiciona uma ou mais @menções antes de `say` (em qualquer ordem):\n' +
             '• `/delay @bob 5m say avisa-me quando estiveres livre`\n\n' +
+            '*Repetir uma mensagem:* começa com `every` e indica dia e hora:\n' +
+            '• `/delay every day at 8am say o standup começa em breve`\n' +
+            '• `/delay every weekday at 9am #team say ponto da manhã`\n' +
+            '• `/delay every monday at 8am say verifica as tarefas da semana`\n' +
+            'As repetições continuam até as cancelares, `/delay list` mostra a próxima.\n\n' +
             '*Formatos:* atrasos `3s` `5m` `8h` `2d` `1w` e combinações `8h30m`; horas `8am`, `14:30`, `noon`, `midnight` com `today`, `tomorrow`, um dia da semana ou `next <dia>`.\n' +
             'As horas usam o *teu* fuso horário (definição do perfil).\n\n' +
             '*Gerir:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
@@ -423,12 +528,22 @@ const strings: Catalog = {
         confirm_target_dm: 'como mensagem direta para {users}',
         confirm_target_channels: 'para {channels}',
         confirm_target_reminder: 'como lembrete para você',
+        confirm_scheduled_recurring: '✅ Agendado *{recurrence}*: será enviado {target}, a próxima vez em *{next}*. ID da mensagem: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · próxima vez {next} · {target}',
+        recur_daily: 'todos os dias às {time}',
+        recur_weekdays: 'em todo dia útil às {time}',
+        recur_weekly: 'toda {weekday} às {time}',
+        err_recur_unsupported: 'As repetições precisam de um dia e um horário, ex. `every day at 8am`, `every weekday at 9am` ou `every monday at 8am`.',
+        err_recur_limit: 'Você já tem {max} agendamentos recorrentes, o limite definido pelo administrador. Cancele um primeiro.',
+        err_recur_disabled: 'As mensagens recorrentes estão desativadas neste espaço de trabalho.',
+        recur_cancelled_access: '🔁 Sua mensagem recorrente `{id}` foi cancelada porque você não tem mais acesso a {target}.',
         remind_delivery: '⏰ Lembrete: {text}',
         remind_help_text:
             '*Lembretes pessoais (`/remind`)*\n' +
             'O app lembra você por mensagem direta no horário escolhido. A palavra `say` é obrigatória.\n\n' +
             '• `/remind 20m say verifique o forno`\n' +
             '• `/remind 8am tomorrow say entregue o relatório`\n\n' +
+            '*Repetir um lembrete:* `/remind every weekday at 9am say stand-up`\n\n' +
             '*Gerenciar:* `/remind list`, `/remind cancel <id>`, `/remind cancel all`',
         err_channel_not_found: 'O canal #{name} não foi encontrado neste servidor.',
         err_not_channel_member: 'Você não é membro de #{name}.',
@@ -470,6 +585,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say a manutenção começa em breve`\n\n' +
             '*Como mensagem direta:* adicione uma ou mais @menções antes de `say` (em qualquer ordem):\n' +
             '• `/delay @bob 5m say me avise quando estiver livre`\n\n' +
+            '*Repetir uma mensagem:* comece com `every` e informe dia e horário:\n' +
+            '• `/delay every day at 8am say o standup começa em breve`\n' +
+            '• `/delay every weekday at 9am #team say check-in da manhã`\n' +
+            '• `/delay every monday at 8am say verifique as tarefas da semana`\n' +
+            'As repetições continuam até você cancelar, `/delay list` mostra a próxima.\n\n' +
             '*Formatos:* atrasos `3s` `5m` `8h` `2d` `1w` e combinações `8h30m`; horários `8am`, `14:30`, `noon`, `midnight` com `today`, `tomorrow`, um dia da semana ou `next <dia>`.\n' +
             'Os horários usam o *seu* fuso horário (configuração do perfil).\n\n' +
             '*Gerenciar:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
@@ -480,12 +600,22 @@ const strings: Catalog = {
         confirm_target_dm: '{users} へのダイレクトメッセージとして',
         confirm_target_channels: '{channels} に',
         confirm_target_reminder: 'あなたへのリマインダーとして',
+        confirm_scheduled_recurring: '✅ *{recurrence}* で予約しました: {target}送信します。次回は *{next}*。メッセージ ID: `{id}`',
+        list_line_head_recurring: 'ID `{id}` · 🔁 *{recurrence}* · 次回 {next} · {target}',
+        recur_daily: '毎日 {time}',
+        recur_weekdays: '平日の {time}',
+        recur_weekly: '毎週{weekday} {time}',
+        err_recur_unsupported: '繰り返しには曜日と時刻が必要です。例: `every day at 8am`、`every weekday at 9am`、`every monday at 8am`',
+        err_recur_limit: '繰り返しスケジュールは既に {max} 件あり、管理者の上限に達しています。先にどれかをキャンセルしてください。',
+        err_recur_disabled: 'このワークスペースでは繰り返しメッセージが無効になっています。',
+        recur_cancelled_access: '🔁 {target} へのアクセス権がなくなったため、繰り返しメッセージ `{id}` をキャンセルしました。',
         remind_delivery: '⏰ リマインダー: {text}',
         remind_help_text:
             '*個人リマインダー (`/remind`)*\n' +
             '指定した時刻にアプリがダイレクトメッセージでお知らせします。`say` は必須です。\n\n' +
             '• `/remind 20m say オーブンを確認`\n' +
             '• `/remind 8am tomorrow say レポートを提出`\n\n' +
+            '*リマインダーを繰り返す:* `/remind every weekday at 9am say スタンドアップ`\n\n' +
             '*管理:* `/remind list`、`/remind cancel <id>`、`/remind cancel all`',
         err_channel_not_found: 'チャンネル #{name} はこのサーバーに見つかりません。',
         err_not_channel_member: '#{name} のメンバーではありません。',
@@ -527,6 +657,11 @@ const strings: Catalog = {
             '• `/delay 10m #announcements say まもなくメンテナンスが始まります`\n\n' +
             '*ダイレクトメッセージとして送信:* `say` の前に @メンションを追加します（順序は自由）:\n' +
             '• `/delay @bob 5m say 手が空いたら連絡ください`\n\n' +
+            '*メッセージを繰り返す:* `every` で始めて曜日と時刻を指定します:\n' +
+            '• `/delay every day at 8am say もうすぐスタンドアップです`\n' +
+            '• `/delay every weekday at 9am #team say 朝のチェックイン`\n' +
+            '• `/delay every monday at 8am say 今週のタスクを確認`\n' +
+            '繰り返しはキャンセルするまで続きます。次回は `/delay list` で確認できます。\n\n' +
             '*時間の形式:* 遅延 `3s` `5m` `8h` `2d` `1w`、組み合わせ `8h30m`。時刻 `8am`、`14:30`、`noon`、`midnight` を `today`、`tomorrow`、曜日、`next <曜日>` と組み合わせられます。\n' +
             '時刻は*あなたの*タイムゾーン（プロフィール設定）で解釈されます。\n\n' +
             '*管理:* `/delay list`、`/delay cancel <id>`、`/delay cancel all`',

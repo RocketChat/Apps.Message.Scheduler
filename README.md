@@ -27,7 +27,7 @@ Send to other channels the same way, with one or more #channel names. Channels a
 /delay 1h #dev #ops @carol say deploy is done
 ```
 
-You must be a member of every channel you target, since the message is sent as you. Membership is checked again when the message is due: if you have left or been removed from a target channel (or from the room you scheduled in) before delivery, that delivery is dropped rather than posted into a room you no longer have access to.
+Because the message is sent as you, the app checks that you may post into each target, both when you schedule and again when the message is due. For a private group that means you must be a member: if you left or were removed before delivery, that delivery is dropped rather than posted into a room you no longer belong to. Public channels are not restricted this way, since anyone may post into them (Rocket.Chat simply joins you when you send).
 
 Manage your scheduled messages:
 
@@ -41,6 +41,25 @@ Manage your scheduled messages:
 Every successful schedule replies with an ephemeral confirmation showing the id, the resolved delivery time, and how far away it is, along with Cancel, List, and Help buttons.
 
 When the app is installed, its bot sends the installing admin a direct message with the full usage guide, in the admin's own language.
+
+## Repeating messages
+
+Start the time expression with `every` and give a day and a time of day:
+
+```
+/delay every day at 8am say daily standup starts soon
+/delay every weekday at 9am #team say morning check-in
+/delay every monday at 8am say check your weekly tasks
+/remind every weekday at 9am say stand-up
+```
+
+Accepted periods are `day`, `weekday` (Monday to Friday), and any weekday name. A repeat always needs a time of day, and elapsed-time repeats such as `every 2h` are not supported. The first occurrence is today, or the next matching weekday, if that time is still to come; otherwise it is the following cycle.
+
+Repeats run until cancelled. `/delay cancel <id>`, `/delay cancel all`, and the Cancel button all stop a series, and `/delay list` shows the pattern with the next run. If you lose the right to post into a target, for example by leaving a private group, the series is cancelled and the app bot tells you which schedule stopped and why.
+
+Repeats work by arming one delivery at a time and scheduling the next one after each send, because the Apps-Engine recurring scheduler resolves cron expressions in the server's timezone and cannot express a specific user's local time. An hourly repair sweep re-arms any series whose chain was broken, for example by the app being disabled mid-delivery.
+
+One caveat worth knowing: Rocket.Chat exposes a user's timezone as a fixed hour offset rather than a named zone, so the app re-reads that offset before each occurrence. A series self-corrects once the user's client reports a new offset after a daylight-saving change, but an occurrence falling in that window can be an hour out.
 
 ## Personal reminders
 
@@ -80,6 +99,8 @@ You can only list and cancel your own scheduled messages.
 | Setting | Default | Description |
 | ------- | ------- | ----------- |
 | Maximum delay (days) | 30 | The furthest into the future a message may be scheduled, between 1 and 365 days. Invalid values are rejected in the admin log and fall back to 30. |
+| Allow repeating messages | on | When off, `every ...` schedules are refused and existing repeats stop being armed. |
+| Maximum repeating schedules per user | 10 | How many active repeating schedules one user may have, between 1 and 100. Invalid values fall back to 10. |
 | List snippet length (characters) | 80 | How many characters of each scheduled message are shown in `/delay list` before truncation, between 20 and 500. Longer messages get a Show button that reveals the full text. Invalid values fall back to 80. |
 
 ## Internationalisation

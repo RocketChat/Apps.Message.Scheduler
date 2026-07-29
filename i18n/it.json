@@ -1,11 +1,15 @@
 {
     "delay_command_description": "Pianifica l'invio differito di un messaggio, es. /delay 5m say ciao",
-    "delay_command_params": "<tempo> [@user] [#channel] say <messaggio>",
+    "delay_command_params": "<tempo> | every <day> at <time> [@user] [#channel] say <messaggio>",
     "max_delay_days_label": "Ritardo massimo (giorni)",
     "max_delay_days_description": "Quanto lontano nel futuro può essere pianificato un messaggio, in giorni (1-365). I valori non validi ricadono su 30.",
     "general": "Generale",
     "list_snippet_length_label": "Lunghezza dell'anteprima nella lista (caratteri)",
     "list_snippet_length_description": "Quanti caratteri di ogni messaggio pianificato vengono mostrati in /delay list prima del troncamento (20-500). I messaggi più lunghi ricevono un pulsante Mostra. I valori non validi ricadono su 80.",
     "remind_command_description": "Imposta un promemoria personale, es. /remind 20m say controlla il forno",
-    "remind_command_params": "<tempo> say <promemoria>"
+    "remind_command_params": "<tempo> | every <day> at <time> say <promemoria>",
+    "allow_recurring_label": "Consenti messaggi ricorrenti",
+    "allow_recurring_description": "Se disattivato, /delay e /remind rifiutano le pianificazioni \"every ...\". Le ricorrenze esistenti non vengono più riarmate.",
+    "max_recurring_per_user_label": "Numero massimo di pianificazioni ricorrenti per utente",
+    "max_recurring_per_user_description": "Quante pianificazioni ricorrenti attive può avere ogni utente (1-100). I valori non validi ricadono su 10."
 }

@@ -1,11 +1,15 @@
 {
     "delay_command_description": "Agende o envio de uma mensagem para mais tarde, ex. /delay 5m say olá",
-    "delay_command_params": "<tempo> [@user] [#channel] say <mensagem>",
+    "delay_command_params": "<tempo> | every <day> at <time> [@user] [#channel] say <mensagem>",
     "max_delay_days_label": "Atraso máximo (dias)",
     "max_delay_days_description": "Até quando no futuro uma mensagem pode ser agendada, em dias (1-365). Valores inválidos voltam para 30.",
     "general": "Geral",
     "list_snippet_length_label": "Comprimento do trecho na lista (caracteres)",
     "list_snippet_length_description": "Quantos caracteres de cada mensagem agendada são mostrados em /delay list antes do corte (20-500). Mensagens mais longas recebem um botão Mostrar. Valores inválidos voltam para 80.",
     "remind_command_description": "Crie um lembrete pessoal, ex. /remind 20m say verifique o forno",
-    "remind_command_params": "<tempo> say <lembrete>"
+    "remind_command_params": "<tempo> | every <day> at <time> say <lembrete>",
+    "allow_recurring_label": "Permitir mensagens recorrentes",
+    "allow_recurring_description": "Quando desativado, /delay e /remind recusam agendamentos \"every ...\". As recorrências existentes deixam de ser reagendadas.",
+    "max_recurring_per_user_label": "Máximo de agendamentos recorrentes por usuário",
+    "max_recurring_per_user_description": "Quantos agendamentos recorrentes ativos cada usuário pode ter (1-100). Valores inválidos voltam para 10."
 }

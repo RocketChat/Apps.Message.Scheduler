@@ -10,6 +10,7 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
+import { StartupType } from '@rocket.chat/apps-engine/definition/scheduler';
 import { ISetting, SettingType } from '@rocket.chat/apps-engine/definition/settings';
 import {
     IUIKitInteractionHandler,
@@ -25,6 +26,7 @@ import { cancelFromButton, listMessages, showFullMessage } from './lib/Actions';
 import { getUserLanguage, t } from './lib/i18n';
 import { getOrCreateDirectRoom, sendAsUser } from './lib/MessageDelivery';
 import { notifyUser } from './lib/Notifications';
+import { makeRepairRecurringProcessor, REPAIR_PROCESSOR_ID } from './processors/RepairRecurring';
 import { makeSendScheduledMessageProcessor, SEND_MESSAGE_PROCESSOR_ID } from './processors/SendScheduledMessage';
 
 export class AppsMessageSchedulerApp extends App implements IUIKitInteractionHandler {
@@ -53,10 +55,39 @@ export class AppsMessageSchedulerApp extends App implements IUIKitInteractionHan
             i18nDescription: 'list_snippet_length_description',
         });
 
+        await configuration.settings.provideSetting({
+            id: 'allow_recurring',
+            type: SettingType.BOOLEAN,
+            packageValue: true,
+            required: false,
+            public: false,
+            i18nLabel: 'allow_recurring_label',
+            i18nDescription: 'allow_recurring_description',
+        });
+
+        await configuration.settings.provideSetting({
+            id: 'max_recurring_per_user',
+            type: SettingType.NUMBER,
+            packageValue: 10,
+            required: false,
+            public: false,
+            i18nLabel: 'max_recurring_per_user_label',
+            i18nDescription: 'max_recurring_per_user_description',
+        });
+
         await configuration.scheduler.registerProcessors([
             {
                 id: SEND_MESSAGE_PROCESSOR_ID,
                 processor: makeSendScheduledMessageProcessor(this),
+            },
+            {
+                id: REPAIR_PROCESSOR_ID,
+                processor: makeRepairRecurringProcessor(this),
+                startupSetting: {
+                    type: StartupType.RECURRING,
+                    interval: '0 * * * *', // hourly, server time: only re-arms, never delivers
+                    skipImmediate: true,
+                },
             },
         ]);
 
@@ -113,6 +144,15 @@ export class AppsMessageSchedulerApp extends App implements IUIKitInteractionHan
                 this.getLogger().error(
                     `Invalid value for "Maximum delay (days)": "${setting.value}". ` +
                     `Expected a number between 1 and 365. The default of 30 will be used until this is corrected.`,
+                );
+            }
+        }
+        if (setting.id === 'max_recurring_per_user') {
+            const max = Number(setting.value);
+            if (!Number.isFinite(max) || max < 1 || max > 100) {
+                this.getLogger().error(
+                    `Invalid value for "Maximum recurring schedules per user": "${setting.value}". ` +
+                    `Expected a number between 1 and 100. The default of 10 will be used until this is corrected.`,
                 );
             }
         }

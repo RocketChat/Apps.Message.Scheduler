@@ -1,16 +1,26 @@
-import { monthName, weekdayName } from './i18n';
+import { monthName, t, weekdayName } from './i18n';
 
 export type ParseErrorKey =
     | 'err_no_time'
     | 'err_unknown_token'
     | 'err_mixed_time'
     | 'err_need_time_of_day'
-    | 'err_past';
+    | 'err_past'
+    | 'err_recur_unsupported';
+
+/** A repeating schedule, always anchored to a wall-clock time of day. */
+export interface IRecurrence {
+    kind: 'daily' | 'weekdays' | 'weekly';
+    weekday?: number; // 0 = Sunday, only for kind 'weekly'
+    hours: number;
+    minutes: number;
+}
 
 export interface IParseSuccess {
     ok: true;
-    when: Date; // absolute UTC instant
+    when: Date; // absolute UTC instant of the FIRST occurrence
     usedServerTz: boolean;
+    recurrence?: IRecurrence;
 }
 
 export interface IParseFailure {
@@ -46,9 +56,10 @@ const WEEKDAYS: Record<string, number> = {
 /**
  * Parses the time portion of a /delay invocation.
  *
- * Accepts either a relative delay ("5m", "8h30m", "1h 30m") or a clock
- * expression ("8am tomorrow", "next monday 14:30", "noon today") in any
- * token order. Clock expressions resolve in the user's timezone via
+ * Accepts a relative delay ("5m", "8h30m", "1h 30m"), a clock expression
+ * ("8am tomorrow", "next monday 14:30", "noon today"), or a recurrence
+ * ("every day at 8am", "every weekday at 9am", "every monday at 8am") in
+ * any token order. Clock expressions resolve in the user's timezone via
  * utcOffsetHours; when that is undefined the server timezone is used and
  * usedServerTz is set so the caller can warn.
  */
@@ -59,6 +70,8 @@ export function parseTimeSpec(tokens: Array<string>, utcOffsetHours: number | un
     let dayOffset: number | undefined;
     let weekday: number | undefined;
     let expectWeekday = false;
+    let isRecurring = false;
+    let recurDay: 'day' | 'weekday' | undefined;
 
     for (const raw of tokens) {
         const token = raw.toLowerCase();
@@ -102,6 +115,19 @@ export function parseTimeSpec(tokens: Array<string>, utcOffsetHours: number | un
             expectWeekday = true;
             continue;
         }
+        if (token === 'every') {
+            isRecurring = true;
+            continue;
+        }
+        // "day" and "weekday" only mean anything as recurrence periods
+        if (isRecurring && (token === 'day' || token === 'daily')) {
+            recurDay = 'day';
+            continue;
+        }
+        if (isRecurring && (token === 'weekday' || token === 'weekdays')) {
+            recurDay = 'weekday';
+            continue;
+        }
         if (WEEKDAYS[token] !== undefined) {
             weekday = WEEKDAYS[token];
             continue;
@@ -134,6 +160,36 @@ export function parseTimeSpec(tokens: Array<string>, utcOffsetHours: number | un
 
     if (expectWeekday) {
         return { ok: false, error: 'err_need_time_of_day' };
+    }
+
+    if (isRecurring) {
+        // only wall-clock patterns repeat: "every 2h" and "every tomorrow"
+        // are not supported, and a period without a time cannot be resolved
+        if (hasDuration || dayOffset !== undefined) {
+            return { ok: false, error: 'err_recur_unsupported' };
+        }
+        if (recurDay === undefined && weekday === undefined) {
+            return { ok: false, error: 'err_recur_unsupported' };
+        }
+        if (clock === undefined) {
+            return { ok: false, error: 'err_need_time_of_day' };
+        }
+        let recurrence: IRecurrence;
+        if (recurDay === 'day') {
+            recurrence = { kind: 'daily', hours: clock.hours, minutes: clock.minutes };
+        } else if (recurDay === 'weekday') {
+            recurrence = { kind: 'weekdays', hours: clock.hours, minutes: clock.minutes };
+        } else {
+            recurrence = { kind: 'weekly', weekday, hours: clock.hours, minutes: clock.minutes };
+        }
+        return {
+            ok: true,
+            // the first occurrence is the next one strictly after now, so a
+            // time still to come today fires today rather than next cycle
+            when: nextOccurrence(recurrence, now, utcOffsetHours),
+            usedServerTz: utcOffsetHours === undefined,
+            recurrence,
+        };
     }
 
     const hasClockExpr = clock !== undefined || dayOffset !== undefined || weekday !== undefined;
@@ -220,6 +276,46 @@ function makeCalendar(utcOffsetHours: number | undefined) {
         build: (year: number, month: number, day: number, hours: number, minutes: number): Date =>
             new Date(Date.UTC(year, month, day, hours, minutes, 0, 0) - offsetMs),
     };
+}
+
+/**
+ * The earliest occurrence of a recurrence strictly after `after`, resolved
+ * in the given timezone. Scanning day by day keeps month and year rollover,
+ * and the weekday arithmetic, in the hands of the calendar helper.
+ */
+export function nextOccurrence(recurrence: IRecurrence, after: Date, utcOffsetHours: number | undefined): Date {
+    const cal = makeCalendar(utcOffsetHours);
+    const parts = cal.parts(after);
+    for (let i = 0; i <= 14; i++) {
+        const candidate = cal.build(parts.year, parts.month, parts.day + i, recurrence.hours, recurrence.minutes);
+        if (candidate.getTime() <= after.getTime()) {
+            continue;
+        }
+        const dow = cal.parts(candidate).dow;
+        if (recurrence.kind === 'daily'
+            || (recurrence.kind === 'weekdays' && dow >= 1 && dow <= 5)
+            || (recurrence.kind === 'weekly' && dow === recurrence.weekday)) {
+            return candidate;
+        }
+    }
+    // unreachable: weekly resolves within 7 days and weekdays within 3
+    return cal.build(parts.year, parts.month, parts.day + 7, recurrence.hours, recurrence.minutes);
+}
+
+function pad2(value: number): string {
+    return value < 10 ? `0${value}` : `${value}`;
+}
+
+/** Describes a recurrence, e.g. "every Monday at 08:00". */
+export function formatRecurrence(recurrence: IRecurrence, lang: string): string {
+    const time = `${pad2(recurrence.hours)}:${pad2(recurrence.minutes)}`;
+    if (recurrence.kind === 'daily') {
+        return t(lang, 'recur_daily', { time });
+    }
+    if (recurrence.kind === 'weekdays') {
+        return t(lang, 'recur_weekdays', { time });
+    }
+    return t(lang, 'recur_weekly', { weekday: weekdayName(lang, recurrence.weekday || 0), time });
 }
 
 /** Formats an instant as the user's wall-clock time, e.g. "Monday 13 Jul 2026, 08:00". */

@@ -1,11 +1,15 @@
 {
     "delay_command_description": "Schedule a message to be sent later, e.g. /delay 5m say hello",
-    "delay_command_params": "<time> [@user] [#channel] say <message>",
+    "delay_command_params": "<time> | every <day> at <time> [@user] [#channel] say <message>",
     "max_delay_days_label": "Maximum delay (days)",
     "max_delay_days_description": "The furthest into the future a message may be scheduled, in days (1-365). Invalid values fall back to 30.",
     "general": "General",
     "list_snippet_length_label": "List snippet length (characters)",
     "list_snippet_length_description": "How many characters of each scheduled message are shown in /delay list before truncation (20-500). Longer messages get a Show button. Invalid values fall back to 80.",
     "remind_command_description": "Set a personal reminder, e.g. /remind 20m say check the oven",
-    "remind_command_params": "<time> say <reminder>"
+    "remind_command_params": "<time> | every <day> at <time> say <reminder>",
+    "allow_recurring_label": "Allow repeating messages",
+    "allow_recurring_description": "When off, /delay and /remind refuse \"every ...\" schedules. Existing repeats stop being armed.",
+    "max_recurring_per_user_label": "Maximum repeating schedules per user",
+    "max_recurring_per_user_description": "How many active repeating schedules each user may have (1-100). Invalid values fall back to 10."
 }

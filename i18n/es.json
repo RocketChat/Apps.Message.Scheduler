@@ -1,11 +1,15 @@
 {
     "delay_command_description": "Programa el envío diferido de un mensaje, p. ej. /delay 5m say hola",
-    "delay_command_params": "<tiempo> [@user] [#channel] say <mensaje>",
+    "delay_command_params": "<tiempo> | every <day> at <time> [@user] [#channel] say <mensaje>",
     "max_delay_days_label": "Retraso máximo (días)",
     "max_delay_days_description": "Cuán lejos en el futuro se puede programar un mensaje, en días (1-365). Los valores no válidos vuelven a 30.",
     "general": "General",
     "list_snippet_length_label": "Longitud del fragmento en la lista (caracteres)",
     "list_snippet_length_description": "Cuántos caracteres de cada mensaje programado se muestran en /delay list antes de truncar (20-500). Los mensajes más largos reciben un botón Mostrar. Los valores no válidos vuelven a 80.",
     "remind_command_description": "Crea un recordatorio personal, p. ej. /remind 20m say revisa el horno",
-    "remind_command_params": "<tiempo> say <recordatorio>"
+    "remind_command_params": "<tiempo> | every <day> at <time> say <recordatorio>",
+    "allow_recurring_label": "Permitir mensajes periódicos",
+    "allow_recurring_description": "Si está desactivado, /delay y /remind rechazan las programaciones \"every ...\". Las periódicas existentes dejan de reprogramarse.",
+    "max_recurring_per_user_label": "Máximo de programaciones periódicas por usuario",
+    "max_recurring_per_user_description": "Cuántas programaciones periódicas activas puede tener cada usuario (1-100). Los valores no válidos vuelven a 10."
 }

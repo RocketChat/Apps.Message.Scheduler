@@ -7,13 +7,16 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { t } from './i18n';
 import { notifyUser } from './Notifications';
 import { IScheduledMessageRecord, ScheduledMessageStore } from './ScheduledMessageStore';
-import { formatWhen, parseTimeSpec } from './TimeParser';
+import { formatRecurrence, formatWhen, IRecurrence, parseTimeSpec } from './TimeParser';
 
 export type Notify = (text: string) => Promise<void>;
 
 const SEND_MESSAGE_PROCESSOR_ID = 'scheduled-message';
 const MAX_DELAY_SETTING_ID = 'max_delay_days';
 const DEFAULT_MAX_DELAY_DAYS = 30;
+const ALLOW_RECURRING_SETTING_ID = 'allow_recurring';
+const MAX_RECURRING_SETTING_ID = 'max_recurring_per_user';
+const DEFAULT_MAX_RECURRING = 10;
 
 export interface IScheduleRequest {
     timeTokens: Array<string>;
@@ -24,7 +27,7 @@ export interface IScheduleRequest {
 }
 
 export type ScheduleResult =
-    | { ok: true; record: IScheduledMessageRecord; when: Date; delayMs: number; usedServerTz: boolean }
+    | { ok: true; record: IScheduledMessageRecord; when: Date; delayMs: number; usedServerTz: boolean; recurrence?: IRecurrence }
     | { ok: false; errorKey: string; errorParams?: Record<string, string | number> };
 
 /**
@@ -43,6 +46,20 @@ export async function createSchedule(
         return { ok: false, errorKey: parsed.error, errorParams: { token: parsed.token || '' } };
     }
 
+    if (parsed.recurrence) {
+        if (!(await getRecurringEnabled(app, read))) {
+            return { ok: false, errorKey: 'err_recur_disabled' };
+        }
+        const maxRecurring = await getMaxRecurringPerUser(app, read);
+        const existing = await ScheduledMessageStore.listByUser(read.getPersistenceReader(), user.id);
+        const activeRecurring = existing.filter((r) => r.recurrence).length;
+        if (activeRecurring >= maxRecurring) {
+            return { ok: false, errorKey: 'err_recur_limit', errorParams: { max: maxRecurring } };
+        }
+    }
+
+    // the cap applies to the first occurrence; a recurring series is bounded
+    // by its own guardrails instead, since every next occurrence is near
     const maxDays = await getMaxDelayDays(app, read);
     const delayMs = parsed.when.getTime() - now.getTime();
     if (delayMs > maxDays * 24 * 60 * 60 * 1000) {
@@ -50,7 +67,7 @@ export async function createSchedule(
     }
 
     const record: IScheduledMessageRecord = {
-        shortId: newShortId(),
+        shortId: await newShortId(read),
         jobId: '',
         userId: user.id,
         roomId: room.id,
@@ -62,6 +79,7 @@ export async function createSchedule(
         createdAtIso: now.toISOString(),
         lang,
         utcOffset: user.utcOffset,
+        ...(parsed.recurrence && { recurrence: parsed.recurrence, occurrenceCount: 0 }),
     };
     await ScheduledMessageStore.save(persis, record);
 
@@ -82,7 +100,7 @@ export async function createSchedule(
     record.jobId = jobId;
     await ScheduledMessageStore.update(persis, record);
 
-    return { ok: true, record, when: parsed.when, delayMs, usedServerTz: parsed.usedServerTz };
+    return { ok: true, record, when: parsed.when, delayMs, usedServerTz: parsed.usedServerTz, recurrence: parsed.recurrence };
 }
 
 export async function getMaxDelayDays(app: App, read: IRead): Promise<number> {
@@ -99,13 +117,61 @@ export async function getMaxDelayDays(app: App, read: IRead): Promise<number> {
     return DEFAULT_MAX_DELAY_DAYS;
 }
 
-function newShortId(): string {
-    const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
-    let id = '';
-    for (let i = 0; i < 6; i++) {
-        id += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+/**
+ * Whether a user may post into a room, as opposed to whether they happen to
+ * be subscribed to it. Subscription only equals access for private groups:
+ * anyone can post into a public channel (Rocket.Chat joins them on send), so
+ * requiring a subscription there would drop legitimate messages.
+ */
+export async function canPostTo(read: IRead, room: IRoom, userId: string): Promise<boolean> {
+    if (room.type !== RoomType.PRIVATE_GROUP) {
+        return true;
     }
-    return id;
+    const members = await read.getRoomReader().getMembers(room.id);
+    return members.some((m) => m.id === userId);
+}
+
+export async function getRecurringEnabled(app: App, read: IRead): Promise<boolean> {
+    try {
+        const value = await read.getEnvironmentReader().getSettings().getValueById(ALLOW_RECURRING_SETTING_ID);
+        return value !== false;
+    } catch (err) {
+        app.getLogger().warn(`Could not read setting ${ALLOW_RECURRING_SETTING_ID}, allowing recurring:`, err);
+        return true;
+    }
+}
+
+export async function getMaxRecurringPerUser(app: App, read: IRead): Promise<number> {
+    try {
+        const value = await read.getEnvironmentReader().getSettings().getValueById(MAX_RECURRING_SETTING_ID);
+        const max = Number(value);
+        if (Number.isFinite(max) && max >= 1 && max <= 100) {
+            return Math.floor(max);
+        }
+        app.getLogger().warn(`Setting ${MAX_RECURRING_SETTING_ID} has invalid value "${value}", using default ${DEFAULT_MAX_RECURRING}`);
+    } catch (err) {
+        app.getLogger().warn(`Could not read setting ${MAX_RECURRING_SETTING_ID}:`, err);
+    }
+    return DEFAULT_MAX_RECURRING;
+}
+
+// recurring records live for months, so a duplicate id would be a real
+// collision rather than a theoretical one
+async function newShortId(read: IRead): Promise<string> {
+    const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+    for (let attempt = 0; attempt < 5; attempt++) {
+        let id = '';
+        for (let i = 0; i < 6; i++) {
+            id += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        }
+        const clash = await ScheduledMessageStore.getById(read.getPersistenceReader(), id);
+        if (!clash) {
+            return id;
+        }
+    }
+    // 5 collisions in a 887M space means something is very wrong; let the
+    // caller proceed rather than refusing to schedule
+    return `${Date.now().toString(36).slice(-6)}`;
 }
 
 const DEFAULT_SNIPPET_CAP = 80;
@@ -182,6 +248,21 @@ export async function describeTarget(
     return t(lang, 'list_target_channel', { name: linkChannel(siteUrl, room) });
 }
 
+/** One list row header: recurring rows name the pattern and the next run. */
+async function headFor(read: IRead, record: IScheduledMessageRecord, user: IUser, lang: string, siteUrl: string): Promise<string> {
+    const target = await describeTarget(read, record, user, lang, siteUrl);
+    const when = formatWhen(new Date(record.whenIso), record.utcOffset, lang);
+    if (record.recurrence) {
+        return t(lang, 'list_line_head_recurring', {
+            id: record.shortId,
+            recurrence: formatRecurrence(record.recurrence, lang),
+            next: when,
+            target,
+        });
+    }
+    return t(lang, 'list_line_head', { id: record.shortId, when, target });
+}
+
 export async function listMessages(app: App, read: IRead, modify: IModify, user: IUser, room: IRoom, lang: string, prefix?: string, kind?: 'delay' | 'remind'): Promise<void> {
     const all = await ScheduledMessageStore.listByUser(read.getPersistenceReader(), user.id);
     const records = kind ? all.filter((r) => (r.kind || 'delay') === kind) : all;
@@ -195,11 +276,7 @@ export async function listMessages(app: App, read: IRead, modify: IModify, user:
     const collapsed = records.map((r) => r.text.replace(/\s+/g, ' '));
     const truncated = collapsed.map((s) => s.length > snippetCap);
     const snippets = collapsed.map((s, i) => truncated[i] ? `${s.substring(0, snippetCap - 3)}...` : s);
-    const heads = await Promise.all(records.map(async (r) => t(lang, 'list_line_head', {
-        id: r.shortId,
-        when: formatWhen(new Date(r.whenIso), r.utcOffset, lang),
-        target: await describeTarget(read, r, user, lang, siteUrl),
-    })));
+    const heads = await Promise.all(records.map(async (r) => headFor(read, r, user, lang, siteUrl)));
 
     // per record: metadata row with its Cancel button, snippet row with a
     // Show button when truncated (block text is grid-width-capped, so the
@@ -249,11 +326,7 @@ export async function showFullMessage(
         return;
     }
     const siteUrl = await getSiteUrl(app, read);
-    const head = t(lang, 'list_line_head', {
-        id: record.shortId,
-        when: formatWhen(new Date(record.whenIso), record.utcOffset, lang),
-        target: await describeTarget(read, record, user, lang, siteUrl),
-    });
+    const head = await headFor(read, record, user, lang, siteUrl);
     // full-width text only: adding blocks would suppress the text body,
     // and the record's Cancel button already sits in the list message above
     const quoted = record.text.split('\n').map((l) => `> ${l}`).join('\n');

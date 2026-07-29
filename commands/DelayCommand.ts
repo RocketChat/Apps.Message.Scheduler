@@ -5,10 +5,10 @@ import { ISlashCommand, SlashCommandContext } from '@rocket.chat/apps-engine/def
 import { ButtonStyle } from '@rocket.chat/apps-engine/definition/uikit';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 
-import { cancelAll, cancelOne, createSchedule, getSiteUrl, linkChannel, linkUsers, listMessages } from '../lib/Actions';
+import { cancelAll, cancelOne, canPostTo, createSchedule, getSiteUrl, linkChannel, linkUsers, listMessages } from '../lib/Actions';
 import { getUserLanguage, t } from '../lib/i18n';
 import { notifyUser } from '../lib/Notifications';
-import { formatDuration, formatWhen } from '../lib/TimeParser';
+import { formatDuration, formatRecurrence, formatWhen } from '../lib/TimeParser';
 
 export class DelayCommand implements ISlashCommand {
     public command = 'delay';
@@ -98,8 +98,7 @@ export class DelayCommand implements ISlashCommand {
                 await notify(t(lang, 'err_channel_not_found', { name }));
                 return;
             }
-            const members = await read.getRoomReader().getMembers(channel.id);
-            if (!members.some((m) => m.id === user.id)) {
+            if (!(await canPostTo(read, channel, user.id))) {
                 await notify(t(lang, 'err_not_channel_member', { name }));
                 return;
             }
@@ -128,12 +127,20 @@ export class DelayCommand implements ISlashCommand {
             targetParts.push(t(lang, 'confirm_target_dm', { users: linkUsers(siteUrl, targetUsernames) }));
         }
         const target = targetParts.length ? targetParts.join(' + ') : t(lang, 'confirm_target_room');
-        let confirmation = t(lang, 'confirm_scheduled', {
-            id: shortId,
-            target,
-            when: formatWhen(when, usedServerTz ? undefined : user.utcOffset, lang),
-            relative: t(lang, 'relative_in', { duration: formatDuration(delayMs) }),
-        });
+        const firstWhen = formatWhen(when, usedServerTz ? undefined : user.utcOffset, lang);
+        let confirmation = result.recurrence
+            ? t(lang, 'confirm_scheduled_recurring', {
+                id: shortId,
+                target,
+                recurrence: formatRecurrence(result.recurrence, lang),
+                next: firstWhen,
+            })
+            : t(lang, 'confirm_scheduled', {
+                id: shortId,
+                target,
+                when: firstWhen,
+                relative: t(lang, 'relative_in', { duration: formatDuration(delayMs) }),
+            });
         if (usedServerTz) {
             confirmation += `\n${t(lang, 'tz_warning')}`;
         }

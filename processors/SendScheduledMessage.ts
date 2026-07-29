@@ -2,17 +2,111 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IJobContext } from '@rocket.chat/apps-engine/definition/scheduler';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 
-import { IRoom, RoomType } from '@rocket.chat/apps-engine/definition/rooms';
+import { RoomType } from '@rocket.chat/apps-engine/definition/rooms';
+import { IUser } from '@rocket.chat/apps-engine/definition/users';
 
+import { canPostTo } from '../lib/Actions';
 import { t } from '../lib/i18n';
 import { getOrCreateDirectRoom, sendAsUser } from '../lib/MessageDelivery';
-import { ScheduledMessageStore } from '../lib/ScheduledMessageStore';
+import { IScheduledMessageRecord, ScheduledMessageStore } from '../lib/ScheduledMessageStore';
+import { nextOccurrence } from '../lib/TimeParser';
 
 export const SEND_MESSAGE_PROCESSOR_ID = 'scheduled-message';
 
-async function isMember(read: IRead, roomId: string, userId: string): Promise<boolean> {
-    const members = await read.getRoomReader().getMembers(roomId);
-    return members.some((m) => m.id === userId);
+interface IDeliveryOutcome {
+    /** a target is gone or the sender lost access to it */
+    unreachable?: string;
+}
+
+async function deliver(
+    app: App, read: IRead, modify: IModify,
+    record: IScheduledMessageRecord, sender: IUser,
+): Promise<IDeliveryOutcome> {
+    // reminders are delivered BY the app bot into the bot DM: a
+    // message sent as the user to themselves would never notify them
+    if (record.kind === 'remind') {
+        const appUser = await read.getUserReader().getAppUser(app.getID());
+        if (!appUser) {
+            throw new Error('App user not found for reminder delivery');
+        }
+        const dm = await getOrCreateDirectRoom(read, modify, appUser, sender.username);
+        await sendAsUser(modify, appUser, dm, t(record.lang, 'remind_delivery', { text: record.text }));
+        return {};
+    }
+
+    const channelIds = record.targetChannelIds || [];
+    const usernames = record.targetUsernames || [];
+
+    // membership was validated at schedule time, but time passes before the
+    // job fires: re-check at delivery so a user who left or was removed
+    // cannot still post into the room
+    if (channelIds.length || usernames.length) {
+        let unreachable: string | undefined;
+        for (const channelId of channelIds) {
+            const channel = await read.getRoomReader().getById(channelId);
+            if (!channel) {
+                app.getLogger().warn(`Channel ${channelId} for scheduled message ${record.shortId} no longer exists, skipping`);
+                unreachable = channelId;
+                continue;
+            }
+            if (!(await canPostTo(read, channel, sender.id))) {
+                app.getLogger().warn(`Sender can no longer post in ${channel.slugifiedName}, skipping ${record.shortId} for that channel`);
+                unreachable = `#${channel.displayName || channel.slugifiedName}`;
+                continue;
+            }
+            await sendAsUser(modify, sender, channel, record.text);
+        }
+        for (const username of usernames) {
+            const room = await getOrCreateDirectRoom(read, modify, sender, username);
+            await sendAsUser(modify, sender, room, record.text);
+        }
+        return { unreachable };
+    }
+
+    const room = await read.getRoomReader().getById(record.roomId);
+    if (!room) {
+        throw new Error(`Room ${record.roomId} no longer exists`);
+    }
+    if (!(await canPostTo(read, room, sender.id))) {
+        app.getLogger().warn(`Sender can no longer post in ${room.slugifiedName}, dropping ${record.shortId}`);
+        return { unreachable: `#${room.displayName || room.slugifiedName}` };
+    }
+    await sendAsUser(modify, sender, room, record.text);
+    return {};
+}
+
+/**
+ * Arms the next occurrence of a recurring record in place. The offset is
+ * read from the live user rather than the record so a series follows the
+ * user's timezone after a DST change.
+ */
+export async function rearm(
+    app: App, modify: IModify, persis: IPersistence,
+    record: IScheduledMessageRecord, utcOffset: number | undefined, after: Date,
+): Promise<boolean> {
+    if (!record.recurrence) {
+        return false;
+    }
+    const when = nextOccurrence(record.recurrence, after, utcOffset);
+    let jobId: string | void = undefined;
+    try {
+        jobId = await modify.getScheduler().scheduleOnce({
+            id: SEND_MESSAGE_PROCESSOR_ID,
+            when,
+            data: { shortId: record.shortId },
+        });
+    } catch (err) {
+        app.getLogger().error(`Failed to re-arm recurring message ${record.shortId}:`, err);
+    }
+    if (!jobId) {
+        // leave the record alone: the repair sweep re-arms it later
+        return false;
+    }
+    record.jobId = jobId;
+    record.whenIso = when.toISOString();
+    record.utcOffset = utcOffset;
+    await ScheduledMessageStore.update(persis, record);
+    return true;
 }
 
 export function makeSendScheduledMessageProcessor(app: App) {
@@ -31,63 +125,46 @@ export function makeSendScheduledMessageProcessor(app: App) {
             return;
         }
 
+        let sender: IUser | undefined;
+        let outcome: IDeliveryOutcome = {};
         try {
-            const sender = await read.getUserReader().getById(record.userId);
+            sender = await read.getUserReader().getById(record.userId);
             if (!sender) {
                 throw new Error(`Sender ${record.userId} no longer exists`);
             }
-
-            // reminders are delivered BY the app bot into the bot DM: a
-            // message sent as the user to themselves would never notify them
-            if (record.kind === 'remind') {
-                const appUser = await read.getUserReader().getAppUser(app.getID());
-                if (!appUser) {
-                    throw new Error('App user not found for reminder delivery');
-                }
-                const dm = await getOrCreateDirectRoom(read, modify, appUser, sender.username);
-                await sendAsUser(modify, appUser, dm, t(record.lang, 'remind_delivery', { text: record.text }));
-                return;
-            }
-
-            const channelIds = record.targetChannelIds || [];
-            const usernames = record.targetUsernames || [];
-
-            // membership was validated at schedule time, but up to the full
-            // delay can pass before the job fires: re-check at delivery so a
-            // user who left or was removed cannot still post into the room
-            if (channelIds.length || usernames.length) {
-                for (const channelId of channelIds) {
-                    const channel = await read.getRoomReader().getById(channelId);
-                    if (!channel) {
-                        app.getLogger().warn(`Channel ${channelId} for scheduled message ${shortId} no longer exists, skipping`);
-                        continue;
-                    }
-                    if (!(await isMember(read, channel.id, sender.id))) {
-                        app.getLogger().warn(`Sender is no longer a member of ${channel.slugifiedName}, skipping scheduled message ${shortId} for that channel`);
-                        continue;
-                    }
-                    await sendAsUser(modify, sender, channel, record.text);
-                }
-                for (const username of usernames) {
-                    const room = await getOrCreateDirectRoom(read, modify, sender, username);
-                    await sendAsUser(modify, sender, room, record.text);
-                }
-            } else {
-                const room = await read.getRoomReader().getById(record.roomId);
-                if (!room) {
-                    throw new Error(`Room ${record.roomId} no longer exists`);
-                }
-                if (room.type !== RoomType.DIRECT_MESSAGE && !(await isMember(read, room.id, sender.id))) {
-                    app.getLogger().warn(`Sender is no longer a member of ${room.slugifiedName}, dropping scheduled message ${shortId}`);
-                    return;
-                }
-                await sendAsUser(modify, sender, room, record.text);
-            }
+            outcome = await deliver(app, read, modify, record, sender);
         } catch (err) {
             app.getLogger().error(`Failed to deliver scheduled message ${shortId}:`, err);
-        } finally {
-            // the job fired; the record is spent either way
-            await ScheduledMessageStore.removeById(persis, shortId);
         }
+
+        // one-shot messages are spent once they fire, however they went
+        if (!record.recurrence) {
+            await ScheduledMessageStore.removeById(persis, shortId);
+            return;
+        }
+
+        // losing access to a target ends the series, and the owner is told
+        if (outcome.unreachable) {
+            await ScheduledMessageStore.removeById(persis, shortId);
+            try {
+                const appUser = await read.getUserReader().getAppUser(app.getID());
+                if (appUser && sender) {
+                    const dm = await getOrCreateDirectRoom(read, modify, appUser, sender.username);
+                    await sendAsUser(modify, appUser, dm, t(record.lang, 'recur_cancelled_access', {
+                        id: record.shortId,
+                        target: outcome.unreachable,
+                    }));
+                }
+            } catch (err) {
+                app.getLogger().error(`Could not notify owner about cancelled series ${shortId}:`, err);
+            }
+            return;
+        }
+
+        record.occurrenceCount = (record.occurrenceCount || 0) + 1;
+        // never re-arm behind the occurrence just handled, so the series
+        // always moves forward even if the job ran a moment early
+        const after = new Date(Math.max(Date.now(), new Date(record.whenIso).getTime()));
+        await rearm(app, modify, persis, record, sender ? sender.utcOffset : record.utcOffset, after);
     };
 }
