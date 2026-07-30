@@ -76,7 +76,7 @@ The `/remind` command is a specialisation of the same engine for reminding yours
 
 Two styles are supported. They cannot be mixed in one command.
 
-**Relative delays.** Units are `s` (seconds), `m` (minutes), `h` (hours), `d` (days), and `w` (weeks). Units can be combined with or without spaces: `3s`, `5m`, `8h`, `2d`, `1w`, `8h30m`, `1h 30m`.
+**Relative delays.** Units are `m` (minutes), `h` (hours), `d` (days), and `w` (weeks). Units can be combined with or without spaces: `5m`, `8h`, `2d`, `1w`, `8h30m`, `1h 30m`. A minute is the smallest delay; anything expressed in seconds is refused with a message saying so.
 
 **Clock times.** A time of day such as `8am`, `10:30pm`, `14:30`, `noon`, or `midnight`, optionally combined with a day: `today`, `tomorrow`, a weekday name (`monday` through `sunday`, abbreviations accepted), or `next` followed by a weekday. A bare time that has already passed today rolls over to tomorrow. A weekday always means the next future occurrence of that day.
 

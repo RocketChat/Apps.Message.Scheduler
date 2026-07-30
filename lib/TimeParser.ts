@@ -1,6 +1,7 @@
 import { monthName, t, weekdayName } from './i18n';
 
 export type ParseErrorKey =
+    | 'err_seconds_unsupported'
     | 'err_no_time'
     | 'err_unknown_token'
     | 'err_mixed_time'
@@ -31,12 +32,13 @@ export interface IParseFailure {
 
 export type ParseResult = IParseSuccess | IParseFailure;
 
-const DURATION_RE = /^(?:\d+[smhdw])+$/i;
-const DURATION_PART_RE = /(\d+)([smhdw])/gi;
+const DURATION_RE = /^(?:\d+[mhdw])+$/i;
+const DURATION_PART_RE = /(\d+)([mhdw])/gi;
+// same shape but with a seconds part: matched only to give a clear error
+const SECONDS_DURATION_RE = /^(?:\d+[smhdw])+$/i;
 const CLOCK_RE = /^(\d{1,2})(?::(\d{2}))?(am|pm)?$/i;
 
 const UNIT_MS: Record<string, number> = {
-    s: 1000,
     m: 60 * 1000,
     h: 60 * 60 * 1000,
     d: 24 * 60 * 60 * 1000,
@@ -93,6 +95,12 @@ export function parseTimeSpec(tokens: Array<string>, utcOffsetHours: number | un
                 match = DURATION_PART_RE.exec(token);
             }
             continue;
+        }
+
+        // reached only when the duration contains a seconds part, since the
+        // seconds-free pattern is tried first
+        if (SECONDS_DURATION_RE.test(token)) {
+            return { ok: false, error: 'err_seconds_unsupported' };
         }
 
         if (token === 'noon') {

@@ -41,6 +41,7 @@ const strings: Catalog = {
         err_no_message: 'Nothing to send. Put the message after the word `say`, e.g. `/{cmd} 5m say hello`.',
         err_say_no_text: 'Nothing to send after `say`. Keep the whole command on one line: Rocket.Chat discards slash command text after a line break.',
         err_no_time: 'No time found. Use a delay like `5m`, `8h30m`, or a time like `8am tomorrow`, `10am next monday`.',
+        err_seconds_unsupported: 'Seconds are not supported. The smallest delay is a minute, e.g. `1m` or `8h30m`.',
         err_unknown_token: 'Could not understand `{token}`. Type `/{cmd} help` for the accepted formats.',
         err_mixed_time: 'Mixing a relative delay (like `5m`) with a clock time (like `8am tomorrow`) is not supported. Use one or the other.',
         err_need_time_of_day: 'Please include a time of day, e.g. `8am tomorrow` or `next monday 14:30`.',
@@ -83,7 +84,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say morning check-in`\n' +
             '• `/delay every monday at 8am say check your weekly tasks`\n' +
             'Repeats run until you cancel them, and `/delay list` shows the next run.\n\n' +
-            '*Time formats:* delays `3s` `5m` `8h` `2d` `1w` and combos `8h30m`; clock times `8am`, `14:30`, `noon`, `midnight` with `today`, `tomorrow`, a weekday, or `next <weekday>`.\n' +
+            '*Time formats:* delays `5m` `8h` `2d` `1w` and combos `8h30m`; clock times `8am`, `14:30`, `noon`, `midnight` with `today`, `tomorrow`, a weekday, or `next <weekday>`.\n' +
             'Clock times use *your* timezone (profile setting).\n\n' +
             '*Manage:*\n' +
             '• `/delay list`: your pending messages\n' +
@@ -119,6 +120,7 @@ const strings: Catalog = {
         err_no_message: 'Keine Nachricht angegeben. Schreibe die Nachricht nach dem Wort `say`, z. B. `/{cmd} 5m say hallo`.',
         err_say_no_text: 'Nach `say` folgt kein Text. Schreibe den gesamten Befehl in eine Zeile: Rocket.Chat verwirft bei Slash-Befehlen den Text nach einem Zeilenumbruch.',
         err_no_time: 'Keine Zeitangabe gefunden. Nutze eine Verzögerung wie `5m`, `8h30m` oder eine Uhrzeit wie `8am tomorrow`.',
+        err_seconds_unsupported: 'Sekunden werden nicht unterstützt. Die kleinste Verzögerung ist eine Minute, z. B. `1m` oder `8h30m`.',
         err_unknown_token: '`{token}` wurde nicht verstanden. Tippe `/{cmd} help` für die gültigen Formate.',
         err_mixed_time: 'Eine relative Verzögerung (`5m`) und eine Uhrzeit (`8am tomorrow`) können nicht kombiniert werden.',
         err_need_time_of_day: 'Bitte eine Uhrzeit angeben, z. B. `8am tomorrow` oder `next monday 14:30`.',
@@ -158,7 +160,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say Morgen-Check-in`\n' +
             '• `/delay every monday at 8am say Wochenaufgaben prüfen`\n' +
             'Wiederholungen laufen bis zur Stornierung, `/delay list` zeigt den nächsten Termin.\n\n' +
-            '*Zeitformate:* Verzögerungen `3s` `5m` `8h` `2d` `1w`, Kombis `8h30m`; Uhrzeiten `8am`, `14:30`, `noon`, `midnight` mit `today`, `tomorrow`, Wochentag oder `next <Wochentag>`.\n' +
+            '*Zeitformate:* Verzögerungen `5m` `8h` `2d` `1w`, Kombis `8h30m`; Uhrzeiten `8am`, `14:30`, `noon`, `midnight` mit `today`, `tomorrow`, Wochentag oder `next <Wochentag>`.\n' +
             'Uhrzeiten nutzen *deine* Zeitzone (Profileinstellung).\n\n' +
             '*Verwalten:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
     },
@@ -191,6 +193,7 @@ const strings: Catalog = {
         err_no_message: 'Aucun message à envoyer. Placez le message après le mot `say`, ex. `/{cmd} 5m say bonjour`.',
         err_say_no_text: 'Aucun texte après `say`. Gardez toute la commande sur une seule ligne : Rocket.Chat ignore le texte des commandes slash après un saut de ligne.',
         err_no_time: 'Aucune indication de temps. Utilisez un délai comme `5m`, `8h30m` ou une heure comme `8am tomorrow`.',
+        err_seconds_unsupported: 'Les secondes ne sont pas prises en charge. Le délai minimal est d\'une minute, ex. `1m` ou `8h30m`.',
         err_unknown_token: '`{token}` non compris. Tapez `/{cmd} help` pour les formats acceptés.',
         err_mixed_time: 'Impossible de combiner un délai relatif (`5m`) et une heure (`8am tomorrow`).',
         err_need_time_of_day: 'Veuillez préciser une heure, ex. `8am tomorrow` ou `next monday 14:30`.',
@@ -230,7 +233,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say point du matin`\n' +
             '• `/delay every monday at 8am say vérifiez vos tâches de la semaine`\n' +
             'Les répétitions durent jusqu\'à annulation, `/delay list` montre la prochaine.\n\n' +
-            '*Formats :* délais `3s` `5m` `8h` `2d` `1w`, combinés `8h30m` ; heures `8am`, `14:30`, `noon`, `midnight` avec `today`, `tomorrow`, un jour de semaine ou `next <jour>`.\n' +
+            '*Formats :* délais `5m` `8h` `2d` `1w`, combinés `8h30m` ; heures `8am`, `14:30`, `noon`, `midnight` avec `today`, `tomorrow`, un jour de semaine ou `next <jour>`.\n' +
             'Les heures utilisent *votre* fuseau (profil).\n\n' +
             '*Gérer :* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
     },
@@ -263,6 +266,7 @@ const strings: Catalog = {
         err_no_message: 'Nessun messaggio da inviare. Scrivi il messaggio dopo la parola `say`, es. `/{cmd} 5m say ciao`.',
         err_say_no_text: 'Nessun testo dopo `say`. Tieni l\'intero comando su una sola riga: Rocket.Chat scarta il testo dei comandi slash dopo un ritorno a capo.',
         err_no_time: 'Nessuna indicazione di tempo. Usa un ritardo come `5m`, `8h30m` o un orario come `8am tomorrow`.',
+        err_seconds_unsupported: 'I secondi non sono supportati. Il ritardo minimo è di un minuto, es. `1m` o `8h30m`.',
         err_unknown_token: '`{token}` non riconosciuto. Digita `/{cmd} help` per i formati accettati.',
         err_mixed_time: 'Non è possibile combinare un ritardo relativo (`5m`) con un orario (`8am tomorrow`). Usane uno solo.',
         err_need_time_of_day: 'Indica un orario, es. `8am tomorrow` o `next monday 14:30`.',
@@ -302,7 +306,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say check-in del mattino`\n' +
             '• `/delay every monday at 8am say controlla le attività della settimana`\n' +
             'Le ripetizioni continuano fino all\'annullamento, `/delay list` mostra la prossima.\n\n' +
-            '*Formati:* ritardi `3s` `5m` `8h` `2d` `1w`, combinati `8h30m`; orari `8am`, `14:30`, `noon`, `midnight` con `today`, `tomorrow`, un giorno della settimana o `next <giorno>`.\n' +
+            '*Formati:* ritardi `5m` `8h` `2d` `1w`, combinati `8h30m`; orari `8am`, `14:30`, `noon`, `midnight` con `today`, `tomorrow`, un giorno della settimana o `next <giorno>`.\n' +
             'Gli orari usano il *tuo* fuso orario (impostazione del profilo).\n\n' +
             '*Gestione:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
     },
@@ -335,6 +339,7 @@ const strings: Catalog = {
         err_no_message: 'No hay nada que enviar. Escribe el mensaje después de la palabra `say`, p. ej. `/{cmd} 5m say hola`.',
         err_say_no_text: 'No hay texto después de `say`. Mantén todo el comando en una sola línea: Rocket.Chat descarta el texto de los comandos de barra después de un salto de línea.',
         err_no_time: 'No se encontró ninguna indicación de tiempo. Usa un retraso como `5m`, `8h30m` o una hora como `8am tomorrow`.',
+        err_seconds_unsupported: 'Los segundos no son compatibles. El retraso mínimo es un minuto, p. ej. `1m` u `8h30m`.',
         err_unknown_token: 'No se entendió `{token}`. Escribe `/{cmd} help` para ver los formatos aceptados.',
         err_mixed_time: 'No se puede combinar un retraso relativo (`5m`) con una hora (`8am tomorrow`). Usa solo uno.',
         err_need_time_of_day: 'Incluye una hora del día, p. ej. `8am tomorrow` o `next monday 14:30`.',
@@ -374,7 +379,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say revisión de la mañana`\n' +
             '• `/delay every monday at 8am say revisa tus tareas de la semana`\n' +
             'Las repeticiones siguen hasta que las canceles, `/delay list` muestra la próxima.\n\n' +
-            '*Formatos:* retrasos `3s` `5m` `8h` `2d` `1w` y combinados `8h30m`; horas `8am`, `14:30`, `noon`, `midnight` con `today`, `tomorrow`, un día de la semana o `next <día>`.\n' +
+            '*Formatos:* retrasos `5m` `8h` `2d` `1w` y combinados `8h30m`; horas `8am`, `14:30`, `noon`, `midnight` con `today`, `tomorrow`, un día de la semana o `next <día>`.\n' +
             'Las horas usan *tu* zona horaria (ajuste del perfil).\n\n' +
             '*Gestión:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
     },
@@ -407,6 +412,7 @@ const strings: Catalog = {
         err_no_message: 'Inget att skicka. Skriv meddelandet efter ordet `say`, t.ex. `/{cmd} 5m say hej`.',
         err_say_no_text: 'Ingen text efter `say`. Håll hela kommandot på en rad: Rocket.Chat kastar bort text efter en radbrytning i snedstreckskommandon.',
         err_no_time: 'Ingen tidsangivelse hittades. Använd en fördröjning som `5m`, `8h30m` eller en tid som `8am tomorrow`.',
+        err_seconds_unsupported: 'Sekunder stöds inte. Kortaste fördröjningen är en minut, t.ex. `1m` eller `8h30m`.',
         err_unknown_token: 'Förstod inte `{token}`. Skriv `/{cmd} help` för giltiga format.',
         err_mixed_time: 'Det går inte att blanda en relativ fördröjning (`5m`) med en klocktid (`8am tomorrow`). Välj en av dem.',
         err_need_time_of_day: 'Ange en tid på dygnet, t.ex. `8am tomorrow` eller `next monday 14:30`.',
@@ -446,7 +452,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say morgoncheck`\n' +
             '• `/delay every monday at 8am say kolla veckans uppgifter`\n' +
             'Upprepningar pågår till du avbryter dem, `/delay list` visar nästa gång.\n\n' +
-            '*Tidsformat:* fördröjningar `3s` `5m` `8h` `2d` `1w` och kombinationer `8h30m`; klockslag `8am`, `14:30`, `noon`, `midnight` med `today`, `tomorrow`, en veckodag eller `next <veckodag>`.\n' +
+            '*Tidsformat:* fördröjningar `5m` `8h` `2d` `1w` och kombinationer `8h30m`; klockslag `8am`, `14:30`, `noon`, `midnight` med `today`, `tomorrow`, en veckodag eller `next <veckodag>`.\n' +
             'Klockslag använder *din* tidszon (profilinställning).\n\n' +
             '*Hantera:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
     },
@@ -479,6 +485,7 @@ const strings: Catalog = {
         err_no_message: 'Nada para enviar. Escreve a mensagem depois da palavra `say`, ex. `/{cmd} 5m say olá`.',
         err_say_no_text: 'Nenhum texto depois de `say`. Mantém o comando inteiro numa só linha: o Rocket.Chat descarta o texto dos comandos de barra após uma quebra de linha.',
         err_no_time: 'Nenhuma indicação de tempo encontrada. Usa um atraso como `5m`, `8h30m` ou uma hora como `8am tomorrow`.',
+        err_seconds_unsupported: 'Os segundos não são suportados. O atraso mínimo é um minuto, ex. `1m` ou `8h30m`.',
         err_unknown_token: 'Não foi possível entender `{token}`. Escreve `/{cmd} help` para ver os formatos aceites.',
         err_mixed_time: 'Não é possível combinar um atraso relativo (`5m`) com uma hora (`8am tomorrow`). Usa apenas um.',
         err_need_time_of_day: 'Indica uma hora do dia, ex. `8am tomorrow` ou `next monday 14:30`.',
@@ -518,7 +525,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say ponto da manhã`\n' +
             '• `/delay every monday at 8am say verifica as tarefas da semana`\n' +
             'As repetições continuam até as cancelares, `/delay list` mostra a próxima.\n\n' +
-            '*Formatos:* atrasos `3s` `5m` `8h` `2d` `1w` e combinações `8h30m`; horas `8am`, `14:30`, `noon`, `midnight` com `today`, `tomorrow`, um dia da semana ou `next <dia>`.\n' +
+            '*Formatos:* atrasos `5m` `8h` `2d` `1w` e combinações `8h30m`; horas `8am`, `14:30`, `noon`, `midnight` com `today`, `tomorrow`, um dia da semana ou `next <dia>`.\n' +
             'As horas usam o *teu* fuso horário (definição do perfil).\n\n' +
             '*Gerir:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
     },
@@ -551,6 +558,7 @@ const strings: Catalog = {
         err_no_message: 'Nada para enviar. Coloque a mensagem depois da palavra `say`, ex. `/{cmd} 5m say olá`.',
         err_say_no_text: 'Nenhum texto depois de `say`. Mantenha o comando inteiro em uma única linha: o Rocket.Chat descarta o texto de comandos de barra após uma quebra de linha.',
         err_no_time: 'Nenhuma indicação de tempo encontrada. Use um atraso como `5m`, `8h30m` ou um horário como `8am tomorrow`.',
+        err_seconds_unsupported: 'Os segundos não são suportados. O atraso mínimo é um minuto, ex. `1m` ou `8h30m`.',
         err_unknown_token: 'Não foi possível entender `{token}`. Digite `/{cmd} help` para ver os formatos aceitos.',
         err_mixed_time: 'Não é possível combinar um atraso relativo (`5m`) com um horário (`8am tomorrow`). Use apenas um.',
         err_need_time_of_day: 'Informe um horário, ex. `8am tomorrow` ou `next monday 14:30`.',
@@ -590,7 +598,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say check-in da manhã`\n' +
             '• `/delay every monday at 8am say verifique as tarefas da semana`\n' +
             'As repetições continuam até você cancelar, `/delay list` mostra a próxima.\n\n' +
-            '*Formatos:* atrasos `3s` `5m` `8h` `2d` `1w` e combinações `8h30m`; horários `8am`, `14:30`, `noon`, `midnight` com `today`, `tomorrow`, um dia da semana ou `next <dia>`.\n' +
+            '*Formatos:* atrasos `5m` `8h` `2d` `1w` e combinações `8h30m`; horários `8am`, `14:30`, `noon`, `midnight` com `today`, `tomorrow`, um dia da semana ou `next <dia>`.\n' +
             'Os horários usam o *seu* fuso horário (configuração do perfil).\n\n' +
             '*Gerenciar:* `/delay list`, `/delay cancel <id>`, `/delay cancel all`',
     },
@@ -623,6 +631,7 @@ const strings: Catalog = {
         err_no_message: '送信する内容がありません。`say` の後にメッセージを書いてください。例: `/{cmd} 5m say こんにちは`',
         err_say_no_text: '`say` の後にテキストがありません。コマンド全体を 1 行で入力してください。Rocket.Chat はスラッシュコマンドの改行以降のテキストを破棄します。',
         err_no_time: '時間の指定が見つかりません。`5m` や `8h30m` のような遅延、または `8am tomorrow` のような時刻を使ってください。',
+        err_seconds_unsupported: '秒は使用できません。最小の遅延は 1 分です。例: `1m`、`8h30m`',
         err_unknown_token: '`{token}` を解釈できませんでした。`/{cmd} help` で使用できる形式を確認してください。',
         err_mixed_time: '相対的な遅延（`5m`）と時刻指定（`8am tomorrow`）は同時に使えません。どちらか一方を使ってください。',
         err_need_time_of_day: '時刻を指定してください。例: `8am tomorrow`、`next monday 14:30`',
@@ -662,7 +671,7 @@ const strings: Catalog = {
             '• `/delay every weekday at 9am #team say 朝のチェックイン`\n' +
             '• `/delay every monday at 8am say 今週のタスクを確認`\n' +
             '繰り返しはキャンセルするまで続きます。次回は `/delay list` で確認できます。\n\n' +
-            '*時間の形式:* 遅延 `3s` `5m` `8h` `2d` `1w`、組み合わせ `8h30m`。時刻 `8am`、`14:30`、`noon`、`midnight` を `today`、`tomorrow`、曜日、`next <曜日>` と組み合わせられます。\n' +
+            '*時間の形式:* 遅延 `5m` `8h` `2d` `1w`、組み合わせ `8h30m`。時刻 `8am`、`14:30`、`noon`、`midnight` を `today`、`tomorrow`、曜日、`next <曜日>` と組み合わせられます。\n' +
             '時刻は*あなたの*タイムゾーン（プロフィール設定）で解釈されます。\n\n' +
             '*管理:* `/delay list`、`/delay cancel <id>`、`/delay cancel all`',
     },
