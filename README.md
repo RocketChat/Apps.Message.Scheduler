@@ -118,7 +118,7 @@ Requirements: Node.js, the [Rocket.Chat Apps CLI](https://developer.rocket.chat/
 ```bash
 npm install
 npx tsc --noEmit        # typecheck
-rc-apps package         # builds dist/appsmessagescheduler_<version>.zip
+rc-apps package         # builds dist/message-scheduler_<version>.zip
 rc-apps deploy          # deploys using .rcappsconfig
 ```
 
@@ -147,7 +147,11 @@ The name, the subtitle under it, and the Description section on the App Info pag
 
 Use apps-cli 1.14.0 or later. Older CLI releases (1.12.x) bundle an apps-compiler that looks for the engine's permission definitions at a path that moved in apps-engine 1.64, so `rc-apps package` fails with `Cannot find module '@rocket.chat/apps-engine/server/permissions/AppPermissions'` whenever `app.json` declares a `permissions` array. The compiler shipped with 1.14.0 handles both paths, and this app declares its permissions explicitly (`slashcommand`, `scheduler`, `persistence`, `message.write`, `room.read`, `room.write`, `user.read`, `server-setting.read`).
 
-Keep the `@rocket.chat/apps-engine` dependency in `package.json` as a caret range (`^1.64.0`), never an exact version. `rc-apps deploy` copies this dependency spec into `requiredApiVersion` in `app.json`, and the server matches its engine version against that expression. A range accepts every 1.x server from 1.64.0 up, while an exact pin makes the app installable only on servers running exactly that engine version and nothing else.
+`requiredApiVersion` in `app.json` is `>=1.64.0`, an open-ended range rather than an exact version or a caret. The server installs an app only when its own Apps-Engine version satisfies that expression, so an exact pin makes the app installable on one engine build and nothing else, and a caret range (`^1.64.0`) stops at the next major: it is refused by pre-release servers carrying Apps-Engine 2.x, where the engine runtime moves from Deno to Node.
+
+The `@rocket.chat/apps-engine` devDependency in `package.json` stays a caret range (`^1.64.0`) so local typechecking resolves a stable 1.x release. The CLI compares the two with `semver.coerce`, which reduces both `^1.64.0` and `>=1.64.0` to `1.64.0`, so it treats them as the same version and leaves `app.json` alone. Changing either side to a different base version makes the CLI rewrite `requiredApiVersion` from `package.json` on the next package or deploy.
+
+Two things to know about how a version mismatch is reported. The server strips any pre-release suffix before comparing, so an engine reported as `2.0.0-alpha.112` is matched as `2.0.0`. And when the comparison fails, `RequiredApiVersionError` calls `semver.gt` with the app's `requiredApiVersion` as if it were a concrete version, which throws on any range. The real message is lost and the admin UI shows the thrown text instead, for example `Apps_Error_Invalid Version: ^1.64.0`. Read that error as "this server's engine is outside the range you declared", not as a malformed manifest.
 
 ## Licence
 

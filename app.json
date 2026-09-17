@@ -1,15 +1,15 @@
 {
     "id": "d1a653e6-6f19-4f05-bf9d-f786b52d3e23",
-    "version": "0.0.41",
-    "requiredApiVersion": "^1.64.0",
+    "version": "1.0.0",
+    "requiredApiVersion": ">=1.64.0",
     "iconFile": "icon.png",
     "author": {
-        "name": "Mike Farman",
+        "name": "Rocket.Chat",
         "homepage": "https://rocket.chat",
-        "support": "mailto:mike.farman@rocket.chat"
+        "support": "support@rocket.chat"
     },
     "name": "Message Scheduler",
-    "nameSlug": "appsmessagescheduler",
+    "nameSlug": "message-scheduler",
     "classFile": "AppsMessageSchedulerApp.ts",
     "shortDescription": "Compose a message to be sent at a later date",
     "description": "Schedule messages with the /delay slash command, delivered later and sent as you, to the current channel, to other #channels, or as a direct message to @mentioned users. Repeat them with every day, every weekday or every monday at a chosen time, or set personal reminders with /remind. Times resolve in each user's own timezone, and an interactive list cancels or expands any message with one click.",
