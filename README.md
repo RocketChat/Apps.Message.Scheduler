@@ -2,6 +2,15 @@
 
 A Rocket.Chat app for scheduling messages. The `/delay` slash command sends a message later, as you, to the current channel, to other channels, or as a direct message to mentioned users. The `/remind` command sets personal reminders that the app bot delivers to you by direct message at the chosen time. Everything runs on the native Apps-Engine scheduler: no REST calls, no external services, and scheduled jobs survive server restarts.
 
+## Screenshots
+
+| | |
+| --- | --- |
+| ![Scheduling a message](docs/screenshots/01-schedule-confirmation.png) | ![Setting a reminder](docs/screenshots/02-remind-confirmation.png) |
+| Scheduling a message. The confirmation shows the resolved delivery time, the message id and buttons to cancel, list or get help. | A personal reminder set with `/remind`, delivered later by the app bot as a direct message. |
+| ![Listing scheduled messages](docs/screenshots/03-list-with-cancel.png) | ![App settings](docs/screenshots/05-admin-settings.png) |
+| `/delay list` shows everything pending, one-shots and repeats together, each with its own Cancel button. | The admin settings, all four validated and safe to leave at their defaults. |
+
 ## Usage
 
 Schedule a message to the current channel:
